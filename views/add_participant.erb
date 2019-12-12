@@ -1,12 +1,27 @@
-<h1>Hello, <%= user.email %><h1>
+<h1>Hello, <%= user.email %></h1>
 
-<form action="/picks" method="post">
-  <% games.each_with_index do |game, i| %>
-  <div>
-    <%= [game[:date], game[:name], game[:visitor][:name], game[:home][:name]].join(" ") %>
-    <input type="text" name="points[<%= game[:id] %>]" value="<%= game[:points] %>"/>
-    <input type="hidden" name="choice[<%= game[:id] %>]" value="<%= game[:chosen_team_id] %>"/>
-  </div>
-  <% end %>
-  <input type="submit" name="Save"/>
-</form>
+<div class="picks-container">
+  <form action="/picks" method="post">
+    <table class="picks-table">
+    <tbody>
+    <% games.each_with_index do |game, i| %>
+      <tr>
+        <td class="date"><%= [game[:date], game[:time]].join(" ") %></td>
+        <td class="game-name"><%= game[:name] %></td>
+        <td class="team-name <%= game[:visitor][:id] == game[:chosen_team_id] ? 'chosen' : '' %>"><%= game[:visitor][:name] %></td>
+        <td class="team-name <%= game[:home][:id] == game[:chosen_team_id] ? 'chosen' : '' %>"><%= game[:home][:name] %></td>
+        <td>
+          <input type="text" class="points" name="points[<%= game[:id] %>]" value="<%= game[:points] %>"/>
+          <input type="hidden" name="choice[<%= game[:id] %>]" value="<%= game[:chosen_team_id] %>"/>
+        </td>
+        <td>
+          <a class="game-control" href="/">+</a>
+          <a class="game-control" href="/">-</a>
+        </td>
+      </tr>
+    <% end %>
+    <input type="submit" name="Save"/>
+    </tbody>
+    </table>
+  </form>
+</div>

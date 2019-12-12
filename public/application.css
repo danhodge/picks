@@ -1,1 +1,33 @@
-h1 { color: blue; }
+body {
+  margin: 1em;
+  font-family: sans-serif;
+  background-color: #E1E3E4;
+}
+
+.date {
+  font-size: 12px;
+}
+
+.points {
+  width: 3em;
+}
+
+.chosen {
+  font-weight: bold;
+}
+
+.picks-table {
+  border: 0;
+  border-collapse: collapse;
+  width: 60%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.game-control {
+  text-decoration: none;
+}
+
+tbody tr:nth-child(even) {
+  background: #f0f0f2;
+}

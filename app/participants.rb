@@ -25,7 +25,8 @@ class Participants < Sinatra::Base
 
       games = Game.where(season: participant.season).includes(:bowl, :visitor, :home).order(:game_time, :id).map do |game|
         {
-          date: game.game_time.to_date,
+          date: game.game_time.strftime("%b %d"),
+          time: game.game_time.strftime("%l:%M %P"),
           id: game.id,
           name: game.bowl.name,
           visitor: {
