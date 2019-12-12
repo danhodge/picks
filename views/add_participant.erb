@@ -1,7 +1,12 @@
 <h1>Hello, <%= user.email %><h1>
 
-<% games.each do |game| %>
-<div>
-  <%= game %>
-</div>
-<% end %>
+<form action="/picks" method="post">
+  <% games.each_with_index do |game, i| %>
+  <div>
+    <%= [game[:date], game[:name], game[:visitor][:name], game[:home][:name]].join(" ") %>
+    <input type="text" name="points[<%= game[:id] %>]" value="<%= game[:points] %>"/>
+    <input type="hidden" name="choice[<%= game[:id] %>]" value="<%= game[:chosen_team_id] %>"/>
+  </div>
+  <% end %>
+  <input type="submit" name="Save"/>
+</form>

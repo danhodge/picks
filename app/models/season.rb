@@ -1,4 +1,7 @@
 class Season < ActiveRecord::Base
+  has_many :games
+  has_many :participants
+
   validates :year, presence: true
 
   def self.current
