@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_12_12_022214) do
+ActiveRecord::Schema.define(version: 2019_12_12_022613) do
 
   create_table "bowls", force: :cascade do |t|
     t.string "name", null: false
@@ -19,6 +19,22 @@ ActiveRecord::Schema.define(version: 2019_12_12_022214) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_bowls_on_name", unique: true
+  end
+
+  create_table "games", force: :cascade do |t|
+    t.integer "season_id"
+    t.integer "bowl_id"
+    t.integer "visiting_team_id", null: false
+    t.integer "home_team_id", null: false
+    t.float "point_spread", null: false
+    t.datetime "game_time", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["bowl_id"], name: "index_games_on_bowl_id"
+    t.index ["home_team_id"], name: "index_games_on_home_team_id"
+    t.index ["season_id", "bowl_id"], name: "index_games_on_season_id_and_bowl_id", unique: true
+    t.index ["season_id"], name: "index_games_on_season_id"
+    t.index ["visiting_team_id"], name: "index_games_on_visiting_team_id"
   end
 
   create_table "participants", force: :cascade do |t|
