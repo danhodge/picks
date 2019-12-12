@@ -10,7 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_12_12_021833) do
+ActiveRecord::Schema.define(version: 2019_12_12_021948) do
+
+  create_table "bowls", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "city", null: false
+    t.string "state", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_bowls_on_name", unique: true
+  end
 
   create_table "seasons", force: :cascade do |t|
     t.integer "year", null: false
