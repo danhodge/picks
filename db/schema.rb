@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_12_12_022613) do
+ActiveRecord::Schema.define(version: 2019_12_12_030209) do
 
   create_table "bowls", force: :cascade do |t|
     t.string "name", null: false
@@ -47,6 +47,21 @@ ActiveRecord::Schema.define(version: 2019_12_12_022613) do
     t.index ["nickname", "season_id"], name: "index_participants_on_nickname_and_season_id", unique: true
     t.index ["season_id"], name: "index_participants_on_season_id"
     t.index ["user_id"], name: "index_participants_on_user_id"
+  end
+
+  create_table "picks", force: :cascade do |t|
+    t.integer "season_id"
+    t.integer "participant_id"
+    t.integer "game_id"
+    t.integer "team_id"
+    t.integer "points", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["game_id"], name: "index_picks_on_game_id"
+    t.index ["participant_id"], name: "index_picks_on_participant_id"
+    t.index ["season_id", "participant_id", "game_id"], name: "index_picks_on_season_id_and_participant_id_and_game_id", unique: true
+    t.index ["season_id"], name: "index_picks_on_season_id"
+    t.index ["team_id"], name: "index_picks_on_team_id"
   end
 
   create_table "seasons", force: :cascade do |t|
