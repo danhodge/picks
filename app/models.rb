@@ -1,0 +1,6 @@
+require 'models/bowl'
+require 'models/team'
+require 'models/season'
+require 'models/session'
+require 'models/user'
+require 'models/game'
