@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_12_12_021948) do
+ActiveRecord::Schema.define(version: 2019_12_12_022214) do
 
   create_table "bowls", force: :cascade do |t|
     t.string "name", null: false
@@ -19,6 +19,18 @@ ActiveRecord::Schema.define(version: 2019_12_12_021948) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_bowls_on_name", unique: true
+  end
+
+  create_table "participants", force: :cascade do |t|
+    t.integer "season_id"
+    t.integer "user_id"
+    t.string "nickname", null: false
+    t.integer "tiebreaker", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["nickname", "season_id"], name: "index_participants_on_nickname_and_season_id", unique: true
+    t.index ["season_id"], name: "index_participants_on_season_id"
+    t.index ["user_id"], name: "index_participants_on_user_id"
   end
 
   create_table "seasons", force: :cascade do |t|
