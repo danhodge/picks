@@ -35,3 +35,20 @@ body {
 tbody tr:nth-child(even) {
   background: #f0f0f2;
 }
+
+td {
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
+}
+
+input[type="submit"] {
+  background-color: #35CEED;
+  color: #537278;
+  border-radius: 5px;
+  font-size: 18px;
+  padding: 0.3em;
+}
+
+input[type="submit"]:disabled {
+  background-color: #E0E8EA;
+}

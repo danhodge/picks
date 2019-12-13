@@ -10,6 +10,26 @@ function teamClickListener() {
   };
 }
 
+function pointsUpdateListener(saveButton, totalPoints) {
+  return (event) => {
+    validatePoints(event.target.closest("table"), saveButton, totalPoints);
+  };
+}
+
+function validatePoints(tableElem, saveButton, totalPoints) {
+  let points = Array.from(tableElem.getElementsByClassName("points")).map((elem) => elem.value).filter((val) => /^\d+$/.exec(val)).map((val) => parseInt(val, 10));
+  let sum = points.reduce((memo, value) => memo + value);
+  let pointSet = new Set(points);
+
+  if ((sum == totalPoints) && (pointSet.size == points.length)) {
+    console.log("points are valid, save enabled");
+    saveButton.disabled = false;
+  } else {
+    console.log("points are invalid, save disabled: " + sum + ", " + JSON.stringify(Array.from(pointSet)) + ", " + JSON.stringify(points));
+    saveButton.disabled = true;
+  }
+}
+
 function selectTeam(teamElement) {
   let row = teamElement.parentElement;
   for (let td of row.children) {
