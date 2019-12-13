@@ -21,9 +21,10 @@ class Participants < Sinatra::Base
 
     if user
       participant = Participant.ensure!(user)
+      season = participant.season
       picks_by_game_id = participant.picks.map { |pick| [pick.game_id, [pick.team_id, pick.points]] }.to_h
 
-      games = Game.where(season: participant.season).includes(:bowl, :visitor, :home).order(:game_time, :id).map do |game|
+      games = Game.where(season: season).includes(:bowl, :visitor, :home).order(:game_time, :id).map do |game|
         pick = picks_by_game_id[game.id]
 
         {
@@ -44,7 +45,7 @@ class Participants < Sinatra::Base
         }
       end
 
-      erb :add_participant, layout: :basic, locals: { user: user, games: games }
+      erb :add_participant, layout: :basic, locals: { user: user, games: games, season: { name: season.name, total_points: season.total_points} }
     else
       redirect "/error.html"
     end

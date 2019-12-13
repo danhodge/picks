@@ -14,4 +14,12 @@ class Season < ActiveRecord::Base
 
     Season.where(year: year).first_or_create!
   end
+
+  def name
+    [year, (year + 1) % 2000].map(&:to_s).join("-")
+  end
+
+  def total_points
+    (1..games.count).sum
+  end
 end

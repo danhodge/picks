@@ -2,10 +2,10 @@
 <script>
   ready(() => {
     let saveButton = Array.from(document.getElementsByTagName("input")).find((elem) => elem.type == "submit");
-    validatePicks(document.getElementsByClassName("picks-table")[0], saveButton, 3);
+    validatePicks(document.getElementsByClassName("picks-table")[0], saveButton, <%= season[:total_points] %>);
 
     let clickListener = teamClickListener();
-    let pointsListener = pointsUpdateListener(saveButton, 3);
+    let pointsListener = pointsUpdateListener(saveButton, <%= season[:total_points] %>);
     let fn = (event) => {
       clickListener(event);
       pointsListener(event);
