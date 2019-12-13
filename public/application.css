@@ -16,6 +16,10 @@ body {
   font-weight: bold;
 }
 
+.not-chosen {
+  font-weight: lighter;
+}
+
 .picks-table {
   border: 0;
   border-collapse: collapse;

@@ -1,3 +1,11 @@
+<script type="text/javascript" src="add_participant.js"></script>
+<script>
+  ready(() => {
+    var teams = document.getElementsByClassName("team-name");
+    attachListeners(teams, "click", teamClickListener());
+  });
+</script>
+
 <h1>Hello, <%= user.email %></h1>
 
 <div class="picks-container">
@@ -5,18 +13,14 @@
     <table class="picks-table">
     <tbody>
     <% games.each_with_index do |game, i| %>
-      <tr>
+      <tr data-game-id="<%= game[:id] %>">
         <td class="date"><%= [game[:date], game[:time]].join(" ") %></td>
         <td class="game-name"><%= game[:name] %></td>
-        <td class="team-name <%= game[:visitor][:id] == game[:chosen_team_id] ? 'chosen' : '' %>"><%= game[:visitor][:name] %></td>
-        <td class="team-name <%= game[:home][:id] == game[:chosen_team_id] ? 'chosen' : '' %>"><%= game[:home][:name] %></td>
-        <td>
+        <td data-team-id="<%= game[:visitor][:id] %>" class="team-name <%= game[:visitor][:id] == game[:chosen_team_id] ? 'chosen' : 'not-chosen' %>"><%= game[:visitor][:name] %></td>
+        <td data-team-id="<%= game[:home][:id] %>" class="team-name <%= game[:home][:id] == game[:chosen_team_id] ? 'chosen' : 'not-chosen' %>"><%= game[:home][:name] %></td>
+        <td class="points">
           <input type="text" class="points" name="points[<%= game[:id] %>]" value="<%= game[:points] %>"/>
           <input type="hidden" name="choice[<%= game[:id] %>]" value="<%= game[:chosen_team_id] %>"/>
-        </td>
-        <td>
-          <a class="game-control" href="/">+</a>
-          <a class="game-control" href="/">-</a>
         </td>
       </tr>
     <% end %>
