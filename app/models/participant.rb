@@ -6,19 +6,13 @@ class Participant < ActiveRecord::Base
   validates :nickname, :tiebreaker, presence: true
 
   def self.ensure!(user, season: Season.current)
-    transaction do
-      participant = where(user: user, season: season).first_or_create! do |p|
-        p.nickname ||= user.email.split("@").first
-        p.tiebreaker ||= 1
-      end
-
-      if participant.picks.empty?
-        season.games.each_with_index do |game, i|
-          Pick.create!(season: season, participant: participant, game: game, team: game.visitor, points: i + 1)
-        end
-      end
-
-      participant
+    where(user: user, season: season).first_or_create! do |participant|
+      participant.nickname ||= user.email.split("@").first
+      participant.tiebreaker ||= 1
     end
+  end
+
+  def validate_picks!
+    raise "Invalid picks" unless (picks.count == season.games.count) && (picks.map(&:points).sort == (1..season.games.count).to_a)
   end
 end

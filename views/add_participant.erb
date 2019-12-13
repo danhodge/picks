@@ -1,12 +1,18 @@
 <script type="text/javascript" src="add_participant.js"></script>
 <script>
   ready(() => {
-    attachListeners(document.getElementsByClassName("team-name"), "click", teamClickListener());
-
     let saveButton = Array.from(document.getElementsByTagName("input")).find((elem) => elem.type == "submit");
-    validatePoints(document.getElementsByClassName("picks-table")[0], saveButton, 3);
+    validatePicks(document.getElementsByClassName("picks-table")[0], saveButton, 3);
 
-    attachListeners(document.getElementsByClassName("points"), "input", pointsUpdateListener(saveButton, 3));
+    let clickListener = teamClickListener();
+    let pointsListener = pointsUpdateListener(saveButton, 3);
+    let fn = (event) => {
+      clickListener(event);
+      pointsListener(event);
+    };
+
+    attachListeners(document.getElementsByClassName("team-name"), "click", fn);
+    attachListeners(document.getElementsByClassName("points"), "input", pointsListener);
   });
 </script>
 
