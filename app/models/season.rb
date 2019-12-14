@@ -22,4 +22,8 @@ class Season < ActiveRecord::Base
   def total_points
     (1..games.count).sum
   end
+
+  def cutoff_time
+    games.order(:game_time).pluck(:game_time).first
+  end
 end

@@ -14,7 +14,6 @@
     attachListeners(document.getElementsByClassName("team-name"), "click", fn);
     attachListeners(document.getElementsByClassName("points"), "input", pointsListener);
     attachListeners(document.getElementsByClassName("tiebreaker"), "input", pointsListener);
-    attachListeners(document.getElementsByClassName("nickname"), "input", pointsListener);
   });
 </script>
 
@@ -24,6 +23,14 @@
 
 <div class="picks-title">
 <h2>Picks for <%= season[:name] %></h2>
+</div>
+
+<div class="picks-messages">
+  <div class="message"><%= participant.nickname %></div>
+  <div class="message"><%= message %></div>
+  <% errors.each do |error| %>
+    <div class="error"><%= error %></div>
+  <% end %>
 </div>
 
 <div class="picks-container">
@@ -43,7 +50,7 @@
           <td class="game-name"><%= game[:name] %></td>
           <td data-team-id="<%= game[:visitor][:id] %>" class="team-name <%= game[:visitor][:id] == game[:chosen_team_id] ? 'chosen' : 'not-chosen' %>"><%= game[:visitor][:name] %></td>
           <td data-team-id="<%= game[:home][:id] %>" class="team-name <%= game[:home][:id] == game[:chosen_team_id] ? 'chosen' : 'not-chosen' %>"><%= game[:home][:name] %></td>
-          <td class="points">
+          <td class="points-cell">
             <input type="text" class="points" name="points[<%= game[:id] %>]" value="<%= game[:points] %>"/>
             <input type="hidden" name="choice[<%= game[:id] %>]" value="<%= game[:chosen_team_id] %>"/>
           </td>
@@ -53,9 +60,6 @@
         <td colspan="2">
           <div class="participant-info">
             Tiebreaker <input type="text" class="tiebreaker" name="tiebreaker" value="<%= participant.tiebreaker %>"/>
-          </div>
-          <div class="participant-info">
-            Nickname <input type="text" class="nickname" name="nickname" value="<%= participant.nickname %>"/>
           </div>
         <td>
         <td colspan="3"></td>

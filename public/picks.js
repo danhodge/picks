@@ -1,9 +1,12 @@
 function teamClickListener() {
   return (event) => {
+    let pointsElem = event.target.parentElement.getElementsByClassName("points")[0]
+
     if (event.target.classList.contains("chosen")) {
-      // no-op
+      pointsElem.focus();
     } else if (event.target.classList.contains("not-chosen")) {
       selectTeam(event.target);
+      pointsElem.focus();
     } else {
       console.log("Error: class list does not include chosen or not-chosen: " + event.target.classList);
     }
@@ -42,9 +45,8 @@ function validatePicks(tableElem, saveButton, totalPoints) {
   let pointSet = new Set(points);
   let allChosen = Array.from(document.getElementsByTagName("input")).filter((elem) => elem.type == "hidden").every((elem) => elem.value.length > 0);
   let tiebreakerVal = applyToFirstElementByClassName(tableElem, "tiebreaker", (elem) => intValueOr(1, elem.value));
-  let hasNickname = applyToFirstElementByClassName(tableElem, "nickname", (elem) => elem.value.length > 0)
 
-  if (allChosen && (tiebreakerVal >= 0) && (tiebreakerVal != 1) && hasNickname && (sum == totalPoints) && (pointSet.size == points.length)) {
+  if (allChosen && (tiebreakerVal >= 0) && (tiebreakerVal != 1) && (sum == totalPoints) && (pointSet.size == points.length)) {
     console.log("picks are valid, save enabled");
     saveButton.disabled = false;
   } else {

@@ -21,7 +21,15 @@ class Participants < Sinatra::Base
       session unless session && session.expired?
     end
 
-    def render_picks(participant: current_participant)
+    def logout
+      session = current_session
+      if session
+        session.destroy
+        response.set_cookie(:session, value: "", expires: Time.now - 60)
+      end
+    end
+
+    def render_picks(participant: current_participant, message: "", errors: [])
       picks_by_game_id = participant.picks.map { |pick| [pick.game_id, [pick.team_id, pick.points]] }.to_h
 
       games = Game.where(season: current_season).includes(:bowl, :visitor, :home).order(:game_time, :id).map do |game|
@@ -52,7 +60,9 @@ class Participants < Sinatra::Base
         locals: {
           participant: participant,
           games: games,
-          season: { name: current_season.name, total_points: current_season.total_points}
+          message: message,
+          errors: errors,
+          season: { name: current_season.name, total_points: current_season.total_points }
         }
       )
     end
@@ -79,6 +89,7 @@ class Participants < Sinatra::Base
   get '/add_participant' do
     content_type 'text/html'
 
+    logout
     user = current_user
 
     if !user
@@ -124,6 +135,15 @@ class Participants < Sinatra::Base
     end
   end
 
+  get '/login' do
+    user = logged_in_user
+    if user
+      redirect '/picks'
+    else
+      erb :login, layout: :basic, locals: { errors: [] }
+    end
+  end
+
   post '/sessions' do
     user = logged_in_user
     if user
@@ -141,19 +161,15 @@ class Participants < Sinatra::Base
 
         redirect '/picks'
       else
-        redirect '/login.html'
+        erb :login, layout: :basic, locals: { errors: ["invalid username"] }
       end
     end
   end
 
   get '/logout' do
-    session = current_session
-    if session
-      session.destroy
-      response.set_cookie(:session, value: "", expires: Time.now - 60)
-    end
+    logout
 
-    redirect "/login.html"
+    redirect "/login"
   end
 
   get '/picks' do
@@ -167,23 +183,32 @@ class Participants < Sinatra::Base
   end
 
   post '/picks' do
-    Pick.transaction do
-      if (participant = current_participant)
-        picks_by_game = Pick.where(season: current_season, participant: participant).map { |pick| [pick.game_id, pick] }.to_h
-
-        params[:choice].each do |game_id, team_id|
-          pick = picks_by_game[game_id.to_i] || Pick.new(season_id: participant.season.id, participant_id: participant.id, game_id: game_id.to_i)
-          pick.team_id = team_id.to_i
-          pick.points = params[:points][game_id.to_s]
-          pick.save!
-        end
-        participant.update_attributes!(tiebreaker: Integer(params[:tiebreaker]), nickname: params[:nickname])
-        participant.reload.validate_picks!
-
-        redirect '/add_participant'
-      else
-        redirect "/error.html"
+    begin
+      if Time.now >= current_season.cutoff_time
+        render_picks(errors: ["picks are no longer being accepted"])
+        return
       end
+
+      Pick.transaction do
+        if (participant = current_participant)
+          picks_by_game = Pick.where(season: current_season, participant: participant).map { |pick| [pick.game_id, pick] }.to_h
+
+          params[:choice].each do |game_id, team_id|
+            pick = picks_by_game[game_id.to_i] || Pick.new(season_id: participant.season.id, participant_id: participant.id, game_id: game_id.to_i)
+            pick.team_id = team_id.to_i
+            pick.points = params[:points][game_id.to_s]
+            pick.save!
+          end
+          participant.update_attributes!(tiebreaker: Integer(params[:tiebreaker]))
+          participant.reload.validate_picks!
+
+          render_picks(message: "picks updated successfully")
+        else
+          redirect "/error.html"
+        end
+      end
+    rescue => ex
+      render_picks(errors: ["error updating picks - #{ex.message}"])
     end
   end
 end
