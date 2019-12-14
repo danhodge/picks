@@ -26,6 +26,12 @@ ActiveRecord::Schema.define(version: 2019_12_12_030209) do
     t.integer "bowl_id"
     t.integer "visiting_team_id", null: false
     t.integer "home_team_id", null: false
+    t.integer "home_team_wins", null: false
+    t.integer "home_team_losses", null: false
+    t.integer "home_team_ranking"
+    t.integer "visiting_team_wins", null: false
+    t.integer "visiting_team_losses", null: false
+    t.integer "visiting_team_ranking"
     t.float "point_spread", null: false
     t.datetime "game_time", null: false
     t.datetime "created_at", null: false

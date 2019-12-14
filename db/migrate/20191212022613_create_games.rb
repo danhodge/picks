@@ -5,6 +5,12 @@ class CreateGames < ActiveRecord::Migration[5.2]
       t.references :bowl, index: true
       t.integer :visiting_team_id, null: false
       t.integer :home_team_id, null: false
+      t.integer :home_team_wins, null: false
+      t.integer :home_team_losses, null: false
+      t.integer :home_team_ranking
+      t.integer :visiting_team_wins, null: false
+      t.integer :visiting_team_losses, null: false
+      t.integer :visiting_team_ranking
       t.float :point_spread, null: false
       t.datetime :game_time, null: false
 
