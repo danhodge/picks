@@ -1,52 +1,8 @@
-<script type="text/javascript" src="add_participant.js"></script>
-<script>
-  ready(() => {
-    let saveButton = Array.from(document.getElementsByTagName("input")).find((elem) => elem.type == "submit");
-    validatePicks(document.getElementsByClassName("picks-table")[0], saveButton, <%= season[:total_points] %>);
-
-    let clickListener = teamClickListener();
-    let pointsListener = pointsUpdateListener(saveButton, <%= season[:total_points] %>);
-    let fn = (event) => {
-      clickListener(event);
-      pointsListener(event);
-    };
-
-    attachListeners(document.getElementsByClassName("team-name"), "click", fn);
-    attachListeners(document.getElementsByClassName("points"), "input", pointsListener);
-  });
-</script>
-
-<h1>Hello, <%= user.email %></h1>
-
-<div class="picks-container">
-  <form action="/picks" method="post">
-    <table class="picks-table">
-      <colgroup>
-        <col style="width:13%"/> <!-- date -->
-        <col style="width:27%"/> <!-- game name -->
-        <col style="width:23%"/> <!-- visitor -->
-        <col style="width:23%"/> <!-- home -->
-        <col style="width:4%"/>  <!-- points -->
-      </colgroup>
-      <tbody>
-      <% games.each_with_index do |game, i| %>
-        <tr data-game-id="<%= game[:id] %>">
-          <td class="date"><%= [game[:date], game[:time]].join(" ") %></td>
-          <td class="game-name"><%= game[:name] %></td>
-          <td data-team-id="<%= game[:visitor][:id] %>" class="team-name <%= game[:visitor][:id] == game[:chosen_team_id] ? 'chosen' : 'not-chosen' %>"><%= game[:visitor][:name] %></td>
-          <td data-team-id="<%= game[:home][:id] %>" class="team-name <%= game[:home][:id] == game[:chosen_team_id] ? 'chosen' : 'not-chosen' %>"><%= game[:home][:name] %></td>
-          <td class="points">
-            <input type="text" class="points" name="points[<%= game[:id] %>]" value="<%= game[:points] %>"/>
-            <input type="hidden" name="choice[<%= game[:id] %>]" value="<%= game[:chosen_team_id] %>"/>
-          </td>
-        </tr>
-      <% end %>
-      <tr>
-        <td>
-          <input type="submit" name="Save" value="Save" disabled/>
-        </td>
-      </tr>
-      </tbody>
-    </table>
+<div class="add-participant">
+  <form action="/add_participant" method="POST">
+    <input type="text" name="nickname" value="<%= nickname %>"/>
+    <input type="password" name="password"/>
+    <input type="hidden" name="token" value="<%= token %>"/>
+    <input type="submit" name="Submit"/>
   </form>
 </div>

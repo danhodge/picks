@@ -1,5 +1,6 @@
 class User < ActiveRecord::Base
   has_many :sessions
+  has_many :participants
 
   validates :email, :uuid, presence: true, uniqueness: true
 

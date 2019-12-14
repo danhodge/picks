@@ -52,3 +52,30 @@ input[type="submit"] {
 input[type="submit"]:disabled {
   background-color: #E0E8EA;
 }
+
+.login-container {
+  padding: 10px;
+  border: 1px;
+  border-color: black;
+  border-style: solid;
+  width: 20em;
+  margin-left: 25em;
+}
+
+.login-container > form > div {
+  padding: 5px;
+}
+
+.picks-header {
+  float: right;
+  padding-right: 2em;
+}
+
+.picks-header > a {
+  text-decoration: none;
+  color: #35CEED;
+}
+
+.picks-title {
+  padding-left: 2em;
+}

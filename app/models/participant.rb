@@ -5,10 +5,10 @@ class Participant < ActiveRecord::Base
 
   validates :nickname, :tiebreaker, presence: true
 
-  def self.ensure!(user, season: Season.current)
+  def self.ensure!(user:, nickname:, tiebreaker: 0, season: Season.current)
     where(user: user, season: season).first_or_create! do |participant|
-      participant.nickname ||= user.email.split("@").first
-      participant.tiebreaker ||= 1
+      participant.nickname = nickname
+      participant.tiebreaker = tiebreaker
     end
   end
 
