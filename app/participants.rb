@@ -163,6 +163,7 @@ class Participants < Sinatra::Base
           pick.points = params[:points][game_id.to_s]
           pick.save!
         end
+        participant.update_attributes!(tiebreaker: Integer(params[:tiebreaker]), nickname: params[:nickname])
         participant.reload.validate_picks!
 
         redirect '/add_participant'
