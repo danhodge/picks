@@ -13,15 +13,45 @@ GEM
       minitest (~> 5.1)
       tzinfo (~> 1.1)
     arel (9.0.0)
+    coderay (1.1.2)
     concurrent-ruby (1.1.5)
+    connection_pool (2.2.2)
+    domain_name (0.5.20190701)
+      unf (>= 0.0.5, < 1.0.0)
+    http-cookie (1.0.3)
+      domain_name (~> 0.5)
     i18n (1.7.0)
       concurrent-ruby (~> 1.0)
+    mechanize (2.7.6)
+      domain_name (~> 0.5, >= 0.5.1)
+      http-cookie (~> 1.0)
+      mime-types (>= 1.17.2)
+      net-http-digest_auth (~> 1.1, >= 1.1.1)
+      net-http-persistent (>= 2.5.2)
+      nokogiri (~> 1.6)
+      ntlm-http (~> 0.1, >= 0.1.1)
+      webrobots (>= 0.0.9, < 0.2)
+    method_source (0.9.2)
+    mime-types (3.3)
+      mime-types-data (~> 3.2015)
+    mime-types-data (3.2019.1009)
+    mini_portile2 (2.4.0)
     minitest (5.13.0)
     mustermann (1.0.3)
+    net-http-digest_auth (1.4.1)
+    net-http-persistent (3.1.0)
+      connection_pool (~> 2.2)
+    nokogiri (1.10.7)
+      mini_portile2 (~> 2.4.0)
+    ntlm-http (0.1.1)
+    pry (0.12.2)
+      coderay (~> 1.1.0)
+      method_source (~> 0.9.0)
     rack (2.0.7)
     rack-protection (2.0.7)
       rack
     rake (13.0.1)
+    rb-readline (0.5.5)
     sinatra (2.0.7)
       mustermann (~> 1.0)
       rack (~> 2.0)
@@ -35,13 +65,20 @@ GEM
     tilt (2.0.10)
     tzinfo (1.2.5)
       thread_safe (~> 0.1)
+    unf (0.1.4)
+      unf_ext
+    unf_ext (0.0.7.6)
+    webrobots (0.1.2)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   activerecord (~> 5.2)
+  mechanize (~> 2.7)
+  pry
   rake
+  rb-readline
   sinatra (~> 2.0)
   sinatra-activerecord (~> 2.0)
   sqlite3
