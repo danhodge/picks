@@ -54,23 +54,46 @@ class CBSSchedule
   def scrape
     page = agent.get(url)
     tables = page.search("//table")
-    tables.each do |table|
-      table.search("tr").drop(1).each do |row|
+    tables.flat_map do |table|
+      table.search("tr").drop(1).map do |row|
         date, game, time, matchup = row.search("td")
         game_name, raw_location = extract_text(game).take(2)
         city, state = self.class.normalize_location(raw_location)
-
         visitor, home = matchup.text.split("vs.").map { |value| parse_team(value.strip) }
+        game_time = to_time(date.text.strip, time.text.strip)
 
+        if game_time
+          [game_name, city, state, visitor, home, game_time]
+        else
+          nil
+        end
+      end.compact
+    end
+  end
+
+  def scrape_and_create
+    Game.transaction do
+      scrape.map do |game_name, city, state, visitor, home, game_time|
         bowl = Bowl.where(name: game_name).first_or_create! do |b|
           b.city = city
           b.state = state
         end
 
-        game = Game.where(season: season, bowl: bowl).first_or_create!
+        visiting_team = Team.where(name: visitor[:name]).first_or_create!
+        home_team = Team.where(name: home[:name]).first_or_create!
 
-
-        puts "#{to_time(date.text.strip, time.text.strip)} #{game_name} #{city}, #{state} #{visitor} #{home}"
+        Game.where(season: season, bowl: bowl).first_or_create! do |g|
+          g.visitor = visiting_team
+          g.visiting_team_wins = visitor[:wins]
+          g.visiting_team_losses = visitor[:losses]
+          g.visiting_team_ranking = visitor[:ranking]
+          g.home = home_team
+          g.home_team_wins = home[:wins]
+          g.home_team_losses = home[:losses]
+          g.home_team_ranking = home[:ranking]
+          g.game_time = game_time
+          g.point_spread = 0
+        end
       end
     end
   end
