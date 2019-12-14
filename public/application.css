@@ -36,13 +36,13 @@ body {
   text-decoration: none;
 }
 
-tbody tr:nth-child(even) {
+.picks-table > tbody tr:nth-child(even) {
   background: #f0f0f2;
 }
 
 td {
-  padding-top: 0.2em;
-  padding-bottom: 0.2em;
+  padding-top: 0.3em;
+  padding-bottom: 0.3em;
 }
 
 input[type="submit"] {
@@ -89,4 +89,9 @@ input[type="submit"]:disabled {
   padding-right: 0.2em;
   padding-top: 0.4em;
   padding-bottom: 0.4em;
+}
+
+.error {
+  color: red;
+  text-align: center;
 }

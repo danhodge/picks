@@ -26,10 +26,11 @@ class Participants < Sinatra::Base
 
       games = Game.where(season: current_season).includes(:bowl, :visitor, :home).order(:game_time, :id).map do |game|
         pick = picks_by_game_id[game.id]
+        est_time = game.game_time.getlocal('-05:00')
 
         {
-          date: game.game_time.strftime("%b %d"),
-          time: game.game_time.strftime("%l:%M %P"),
+          date: est_time.strftime("%b %d"),
+          time: est_time.strftime("%l:%M %P"),
           id: game.id,
           name: game.bowl.name,
           visitor: {
@@ -85,7 +86,7 @@ class Participants < Sinatra::Base
     elsif current_participant
       redirect '/picks'
     else
-      erb :add_participant, layout: :basic, locals: { nickname: "", token: user.token }
+      erb :add_participant, layout: :basic, locals: { nickname: "", token: user.token, errors: [] }
     end
   end
 
@@ -97,16 +98,29 @@ class Participants < Sinatra::Base
     elsif current_participant
       redirect '/picks'
     else
-      session, participant = Participant.transaction do
-        user.token = nil
-        user.password = password_digest(params[:password])
-        user.save!
-
-        [Session.create!(user: user), Participant.ensure!(user: user, nickname: params[:nickname], season: current_season)]
+      errors = []
+      errors << "nickname required" if params[:nickname].strip.empty?
+      if Participant.where(season: current_season, nickname: params[:nickname].strip).exists?
+        errors << "nickname is already reservered"
       end
-      response.set_cookie(:session, value: session.token)  # TODO: domain? secure? expiration?
+      errors << "password required" if params[:password].strip.empty?
+      errors << "passwords do not match" if params[:password] != params[:confirm_password]
+      errors << "password must be at least 8 characters" if params[:password] && params[:password].strip.length < 8
 
-      render_picks(participant: participant)
+      if !errors.empty?
+        erb :add_participant, layout: :basic, locals: { nickname: params[:nickname].strip, token: user.token, errors: errors }
+      else
+        session, participant = Participant.transaction do
+          user.token = nil
+          user.password = password_digest(params[:password])
+          user.save!
+
+          [Session.create!(user: user), Participant.ensure!(user: user, nickname: params[:nickname].strip, season: current_season)]
+        end
+        response.set_cookie(:session, value: session.token)  # TODO: domain? secure? expiration?
+
+        render_picks(participant: participant)
+      end
     end
   end
 
