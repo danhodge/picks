@@ -85,6 +85,10 @@ class Participants < Sinatra::Base
       # TODO: salt
       Digest::SHA2.new(512).hexdigest(password)
     end
+
+    def invalid_nickname?(nickname)
+      (nickname.strip.length > 32 || !(nickname =~ /\A[A-Za-z0-9 _\.]+\z/))
+    end
   end
 
   get '/' do
@@ -119,6 +123,7 @@ class Participants < Sinatra::Base
       if Participant.where(season: current_season, nickname: params[:nickname].strip).exists?
         errors << "nickname is already reservered"
       end
+      errors << "invalid nickname" if invalid_nickname?(params[:nickname])
       errors << "password required" if params[:password].strip.empty?
       errors << "passwords do not match" if params[:password] != params[:confirm_password]
       errors << "password must be at least 8 characters" if params[:password] && params[:password].strip.length < 8
