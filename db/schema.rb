@@ -10,12 +10,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_12_12_030209) do
+ActiveRecord::Schema.define(version: 2019_12_15_155245) do
 
   create_table "bowls", force: :cascade do |t|
     t.string "name", null: false
-    t.string "city", null: false
-    t.string "state", null: false
+    t.string "city"
+    t.string "state"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_bowls_on_name", unique: true
@@ -24,16 +24,11 @@ ActiveRecord::Schema.define(version: 2019_12_12_030209) do
   create_table "games", force: :cascade do |t|
     t.integer "season_id"
     t.integer "bowl_id"
-    t.integer "visiting_team_id", null: false
-    t.integer "home_team_id", null: false
-    t.integer "home_team_wins", null: false
-    t.integer "home_team_losses", null: false
-    t.integer "home_team_ranking"
-    t.integer "visiting_team_wins", null: false
-    t.integer "visiting_team_losses", null: false
-    t.integer "visiting_team_ranking"
-    t.float "point_spread", null: false
     t.datetime "game_time", null: false
+    t.integer "visiting_team_id"
+    t.integer "home_team_id"
+    t.float "point_spread"
+    t.integer "game_type", default: 1, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["bowl_id"], name: "index_games_on_bowl_id"
@@ -68,6 +63,19 @@ ActiveRecord::Schema.define(version: 2019_12_12_030209) do
     t.index ["season_id", "participant_id", "game_id"], name: "index_picks_on_season_id_and_participant_id_and_game_id", unique: true
     t.index ["season_id"], name: "index_picks_on_season_id"
     t.index ["team_id"], name: "index_picks_on_team_id"
+  end
+
+  create_table "records", force: :cascade do |t|
+    t.integer "season_id"
+    t.integer "team_id"
+    t.integer "wins", null: false
+    t.integer "losses", null: false
+    t.integer "ranking"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["season_id", "team_id"], name: "index_records_on_season_id_and_team_id", unique: true
+    t.index ["season_id"], name: "index_records_on_season_id"
+    t.index ["team_id"], name: "index_records_on_team_id"
   end
 
   create_table "seasons", force: :cascade do |t|

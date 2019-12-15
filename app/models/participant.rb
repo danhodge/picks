@@ -1,7 +1,7 @@
 class Participant < ActiveRecord::Base
   belongs_to :season
   belongs_to :user
-  has_many :picks
+  has_many :picks, dependent: :destroy
 
   validates :nickname, :tiebreaker, presence: true
 

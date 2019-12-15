@@ -1,8 +1,13 @@
 class Game < ActiveRecord::Base
+  GAME_TYPE_REGULAR = 1
+  GAME_TYPE_SEMIFINAL = 2
+  GAME_TYPE_CHAMPIONSHIP = 3
+
   belongs_to :season
   belongs_to :bowl
   belongs_to :visitor, class_name: Team.name, foreign_key: :visiting_team_id
   belongs_to :home, class_name: Team.name, foreign_key: :home_team_id
 
-  validates :point_spread, :game_time, presence: true
+  validates :game_time, presence: true
+  validates :game_type, inclusion: { in: [GAME_TYPE_REGULAR, GAME_TYPE_SEMIFINAL, GAME_TYPE_CHAMPIONSHIP] }
 end
