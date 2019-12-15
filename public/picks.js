@@ -45,8 +45,9 @@ function validatePicks(tableElem, saveButton, totalPoints) {
   let pointSet = new Set(points);
   let allChosen = Array.from(document.getElementsByTagName("input")).filter((elem) => elem.type == "hidden").every((elem) => elem.value.length > 0);
   let tiebreakerVal = applyToFirstElementByClassName(tableElem, "tiebreaker", (elem) => intValueOr(1, elem.value));
+  let champChosen = (applyToFirstElementByClassName(tableElem, "champion", (elem) => intValueOrNull(elem.value)) !== null);
 
-  if (allChosen && (tiebreakerVal >= 0) && (tiebreakerVal != 1) && (sum == totalPoints) && (pointSet.size == points.length)) {
+  if (allChosen && champChosen && (tiebreakerVal >= 0) && (tiebreakerVal != 1) && (sum == totalPoints) && (pointSet.size == points.length)) {
     console.log("picks are valid, save enabled");
     saveButton.disabled = false;
   } else {

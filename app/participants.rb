@@ -36,22 +36,27 @@ class Participants < Sinatra::Base
         pick = picks_by_game_id[game.id]
         est_time = game.game_time.getlocal('-05:00')
 
-        {
+        game_data = {
           date: est_time.strftime("%b %d"),
           time: est_time.strftime("%l:%M %P"),
           id: game.id,
           name: game.bowl.name,
-          visitor: {
-            id: game.visitor.id,
-            name: game.visitor.name
-          },
-          home: {
-            id: game.home.id,
-            name: game.home.name
-          },
+          type: game.game_type,
           chosen_team_id: pick && pick[0],
           points: pick && pick[1]
         }
+
+        game_data[:visitor] = {
+          id: game.visitor.id,
+          name: game.visitor.name
+        } if game.visitor
+
+        game_data[:home] = {
+          id: game.home.id,
+          name: game.home.name
+        } if game.home
+
+        game_data
       end
 
       erb(

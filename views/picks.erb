@@ -14,6 +14,7 @@
     attachListeners(document.getElementsByClassName("team-name"), "click", fn);
     attachListeners(document.getElementsByClassName("points"), "input", pointsListener);
     attachListeners(document.getElementsByClassName("tiebreaker"), "input", pointsListener);
+    attachListeners(document.getElementsByClassName("champion"), "change", pointsListener);
   });
 </script>
 
@@ -44,7 +45,7 @@
         <col style="width:4%"/>  <!-- points -->
       </colgroup>
       <tbody>
-      <% games.each_with_index do |game, i| %>
+      <% games.select { |game| game[:type] != Game::GAME_TYPE_CHAMPIONSHIP }.each_with_index do |game, i| %>
         <tr data-game-id="<%= game[:id] %>">
           <td class="date"><%= [game[:date], game[:time]].join(" ") %></td>
           <td class="game-name"><%= game[:name] %></td>
@@ -57,7 +58,18 @@
         </tr>
       <% end %>
       <tr>
+        <% championship_game = games.find { |game| game[:type] == Game::GAME_TYPE_CHAMPIONSHIP } %>
+        <% championship_teams = games.select { |game| game[:type] == Game::GAME_TYPE_SEMIFINAL }.flat_map { |game| [game[:visitor], game[:home]] } %>
         <td colspan="2">
+          <select class="champion" name="choice[<%= championship_game[:id] %>]">
+          <option>National Champion</option>
+           <% championship_teams.each do |team| %>
+             <option value="<%= team[:id] %>" <%= championship_game[:chosen_team_id] == team[:id] ? "selected" : "" %>><%= team[:name] %></option>
+           <% end %>
+          </select>
+          <input type="text" class="points" name="points[<%= championship_game[:id] %>]" value="<%= championship_game[:points] %>"/>
+        </td>
+        <td colspan="3">
           <div class="participant-info">
             Tiebreaker <input type="text" class="tiebreaker" name="tiebreaker" value="<%= participant.tiebreaker %>"/>
           </div>
