@@ -1,4 +1,3 @@
-
 class Game < ActiveRecord::Base
   GAME_TYPE_REGULAR = 1
   GAME_TYPE_SEMIFINAL = 2
