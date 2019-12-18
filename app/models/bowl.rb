@@ -5,4 +5,17 @@ class Bowl < ActiveRecord::Base
   def self.championship?(name)
     name.downcase.squeeze(" ").include?("national championship")
   end
+
+  def self.normalize_name(name)
+    normalized = name.gsub(/ Bowl\z/, '')
+    if normalized == "Famous Idaho Potato"
+      "Idaho Potato"
+    else
+      normalized
+    end
+  end
+
+  def name=(name)
+    super(self.class.normalize_name(name))
+  end
 end
