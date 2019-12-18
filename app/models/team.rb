@@ -7,11 +7,18 @@ class Team < ActiveRecord::Base
     "E." => "Eastern",
     "W." => "Western",
     "La." => "Louisiana",
+    "LA" => "Louisiana",
     "Wash." => "Washington"
   }.freeze
 
   ABBREVIATIONS = {
     "FAU" => "Florida Atlantic"
+  }.freeze
+
+  REVERSE_ABBREVIATIONS = {
+    "Alabama Birmingham" => "UAB",
+    "Florida International" => "FIU",
+    "Southern Methodist" => "SMU"
   }.freeze
 
   STATES = {
@@ -26,6 +33,10 @@ class Team < ActiveRecord::Base
       return ABBREVIATIONS[tokens[0]]
     end
 
+    if REVERSE_ABBREVIATIONS.key?(name)
+      return REVERSE_ABBREVIATIONS[name]
+    end
+
     if tokens.count > 1 && PREFIXES.key?(tokens[0])
       tokens[0] = PREFIXES[tokens[0]]
     end
@@ -34,7 +45,15 @@ class Team < ActiveRecord::Base
       tokens[-1] = "(#{STATES[tokens[-1][1..-2]]})"
     end
 
-    tokens.join(" ")
+    corrected = tokens.map do |token|
+      if token == "Flordia"
+        "Florida"
+      else
+        token
+      end
+    end
+
+    corrected.join(" ")
   end
 
   def name=(name)

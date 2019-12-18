@@ -1,3 +1,4 @@
+
 class Game < ActiveRecord::Base
   GAME_TYPE_REGULAR = 1
   GAME_TYPE_SEMIFINAL = 2
@@ -10,4 +11,5 @@ class Game < ActiveRecord::Base
 
   validates :game_time, presence: true
   validates :game_type, inclusion: { in: [GAME_TYPE_REGULAR, GAME_TYPE_SEMIFINAL, GAME_TYPE_CHAMPIONSHIP] }
+  validates :bowl_id, uniqueness: { scope: :season_id }
 end

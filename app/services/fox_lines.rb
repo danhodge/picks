@@ -54,7 +54,7 @@ class FoxLines
         home = Team.find_by!(name: Team.normalize_name(home))
 
         game = Game.find_by!(season: season, bowl: bowl)
-        raise "Game time mismatch for #{game} - expected #{time}" unless game.game_time == time
+        raise "Game time mismatch for #{game} - expected #{time}" unless (game.game_time - Time.parse(time)).abs <= 3600
 
         if game.home == home && game.visitor == visitor
           game.point_spread = visitor_point_spread

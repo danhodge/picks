@@ -10,6 +10,8 @@ class Bowl < ActiveRecord::Base
     normalized = name.gsub(/ Bowl\z/, '')
     if normalized == "Famous Idaho Potato"
       "Idaho Potato"
+    elsif normalized == "Lending Tree"
+      "LendingTree"
     else
       normalized
     end
