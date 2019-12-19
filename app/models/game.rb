@@ -11,4 +11,8 @@ class Game < ActiveRecord::Base
   validates :game_time, presence: true
   validates :game_type, inclusion: { in: [GAME_TYPE_REGULAR, GAME_TYPE_SEMIFINAL, GAME_TYPE_CHAMPIONSHIP] }
   validates :bowl_id, uniqueness: { scope: :season_id }
+
+  def self.games_for_season(season)
+    where(season: season).includes(:bowl, :visitor, :home).order(:game_time, :id)
+  end
 end
