@@ -116,6 +116,7 @@ ActiveRecord::Schema.define(version: 2019_12_20_030135) do
   create_table "users", force: :cascade do |t|
     t.string "email", null: false
     t.string "uuid", null: false
+    t.integer "user_type", default: 1, null: false
     t.string "password"
     t.string "token"
     t.datetime "created_at", null: false

@@ -1,11 +1,19 @@
 class User < ActiveRecord::Base
+  USER_TYPE_REGULAR = 1
+  USER_TYPE_ADMIN = 2
+
   has_many :sessions
   has_many :participants
 
   validates :email, :uuid, presence: true, uniqueness: true
+  validates :user_type, inclusion: { in: [USER_TYPE_REGULAR, USER_TYPE_ADMIN] }
 
   before_validation :assign_uuid
   before_create :assign_token
+
+  def admin?
+    user_type == USER_TYPE_ADMIN
+  end
 
   private
 
