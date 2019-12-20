@@ -59,16 +59,18 @@
       <% end %>
       <tr>
         <% championship_game = games.find { |game| game[:type] == Game::GAME_TYPE_CHAMPIONSHIP } %>
-        <% championship_teams = games.select { |game| game[:type] == Game::GAME_TYPE_SEMIFINAL }.flat_map { |game| [game[:visitor], game[:home]] } %>
-        <td colspan="2">
-          <select class="champion" name="choice[<%= championship_game[:id] %>]">
-          <option>National Champion</option>
-           <% championship_teams.each do |team| %>
-             <option value="<%= team[:id] %>" <%= championship_game[:chosen_team_id] == team[:id] ? "selected" : "" %>><%= team[:name] %></option>
-           <% end %>
-          </select>
-          <input type="text" class="points" name="points[<%= championship_game[:id] %>]" value="<%= championship_game[:points] %>"/>
-        </td>
+        <% if championship_game %>
+          <% championship_teams = games.select { |game| game[:type] == Game::GAME_TYPE_SEMIFINAL }.flat_map { |game| [game[:visitor], game[:home]] } %>
+          <td colspan="2">
+            <select class="champion" name="choice[<%= championship_game[:id] %>]">
+            <option>National Champion</option>
+             <% championship_teams.each do |team| %>
+               <option value="<%= team[:id] %>" <%= championship_game[:chosen_team_id] == team[:id] ? "selected" : "" %>><%= team[:name] %></option>
+             <% end %>
+            </select>
+            <input type="text" class="points" name="points[<%= championship_game[:id] %>]" value="<%= championship_game[:points] %>"/>
+          </td>
+        <% end %>
         <td colspan="3">
           <div class="participant-info">
             Tiebreaker <input type="text" class="tiebreaker" name="tiebreaker" value="<%= participant.tiebreaker %>"/>
