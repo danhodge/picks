@@ -1,5 +1,6 @@
 require 'sinatra/base'
 require 'sinatra/activerecord'
+require 'admin'
 require 'participants'
 
 class Server < Sinatra::Base
@@ -12,6 +13,7 @@ class Server < Sinatra::Base
   set :static_cache_control, [:public, max_age: 1]
 
   use ::Participants
+  use ::Admin
 
   run! if app_file == $0
 end

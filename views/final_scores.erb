@@ -1,0 +1,37 @@
+<div class="final-scores-container">
+  <form action="/final_scores" method="post">
+    <table class="final-scores-table">
+      <colgroup>
+        <col style="width:14%"/> <!-- date -->
+        <col style="width:26%"/> <!-- game name -->
+        <col style="width:26%"/> <!-- visitor -->
+        <col style="width:4%"/>  <!-- visitor score -->
+        <col style="width:26%"/> <!-- home -->
+        <col style="width:4%"/>  <!-- home score -->
+      </colgroup>
+      <tbody>
+      <% games.each do |game| %>
+        <tr data-game-id="<%= game.id %>">
+          <td class="date"><%= game.game_time %></td>
+          <td class="game-name"><%= game.bowl.name %></td>
+          <td class="team-name"><%= game.visitor.name %></td>
+          <td class="points-cell">
+            <% visitor_points = game.final_scores.find { |score| score.team == game.visitor } %>
+            <input type="text" class="points" name="score[<%= [game.id, game.visitor.id].join('_') %>]" value="<%= visitor_points ? visitor_points.points : '' %>"/>
+          </td>
+          <td class="team-name"><%= game.home.name %></td>
+          <td class="points-cell">
+            <% home_points = game.final_scores.find { |score| score.team == game.home } %>
+            <input type="text" class="points" name="score[<%= [game.id, game.home.id].join('_') %>]" value="<%= home_points ? home_points.points : '' %>"/>
+          </td>
+        </tr>
+      <% end %>
+      <tr>
+        <td>
+          <input type="submit" name="Save" value="Save"/>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </form>
+</div>
