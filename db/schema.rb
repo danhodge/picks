@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_12_20_030135) do
+ActiveRecord::Schema.define(version: 2019_12_20_030652) do
 
   create_table "bowls", force: :cascade do |t|
     t.string "name", null: false
@@ -87,6 +87,18 @@ ActiveRecord::Schema.define(version: 2019_12_20_030135) do
     t.index ["season_id", "team_id"], name: "index_records_on_season_id_and_team_id", unique: true
     t.index ["season_id"], name: "index_records_on_season_id"
     t.index ["team_id"], name: "index_records_on_team_id"
+  end
+
+  create_table "scores", force: :cascade do |t|
+    t.integer "game_id", null: false
+    t.integer "team_id", null: false
+    t.integer "points", null: false
+    t.integer "quarter", null: false
+    t.integer "time_remaining_seconds", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["game_id"], name: "index_scores_on_game_id"
+    t.index ["team_id"], name: "index_scores_on_team_id"
   end
 
   create_table "seasons", force: :cascade do |t|
