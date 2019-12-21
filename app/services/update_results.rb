@@ -2,6 +2,10 @@ require 'game'
 require 'aws-sdk-s3'
 
 class UpdateResults
+  def self.perform
+    new.perform
+  end
+
   def initialize(season: Season.current, client: Aws::S3::Client.new(region: 'us-east-1'))
     @season = season
     @client = client

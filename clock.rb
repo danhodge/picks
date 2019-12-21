@@ -1,6 +1,9 @@
-$LOAD_PATH.unshift(File.expand_path('app', __FILE__))
-$LOAD_PATH.unshift(File.expand_path('models', __FILE__))
+$LOAD_PATH.unshift(File.expand_path('app', File.dirname(__FILE__)))
+$LOAD_PATH.unshift(File.expand_path('app/models', File.dirname(__FILE__)))
+$LOAD_PATH.unshift(File.expand_path('app/services', File.dirname(__FILE__)))
 
+require 'sinatra/activerecord'
+require 'models'
 require 'update_scores'
 require 'clockwork'
 require 'fileutils'
