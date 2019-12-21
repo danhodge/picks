@@ -16,13 +16,11 @@
           <td class="game-name"><%= game.bowl.name %></td>
           <td class="team-name"><%= game.visitor.name %></td>
           <td class="points-cell">
-            <% visitor_points = game.final_scores.find { |score| score.team == game.visitor } %>
-            <input type="text" class="points" name="score[<%= [game.id, game.visitor.id].join('_') %>]" value="<%= visitor_points ? visitor_points.points : '' %>"/>
+            <input type="text" class="points" name="score[<%= [game.id, game.visitor.id].join('_') %>]" value="<%= game.visitor_final_score %>"/>
           </td>
           <td class="team-name"><%= game.home.name %></td>
           <td class="points-cell">
-            <% home_points = game.final_scores.find { |score| score.team == game.home } %>
-            <input type="text" class="points" name="score[<%= [game.id, game.home.id].join('_') %>]" value="<%= home_points ? home_points.points : '' %>"/>
+            <input type="text" class="points" name="score[<%= [game.id, game.home.id].join('_') %>]" value="<%= game.home_final_score %>"/>
           </td>
         </tr>
       <% end %>

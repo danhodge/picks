@@ -13,6 +13,22 @@ GEM
       minitest (~> 5.1)
       tzinfo (~> 1.1)
     arel (9.0.0)
+    aws-eventstream (1.0.3)
+    aws-partitions (1.259.0)
+    aws-sdk-core (3.86.0)
+      aws-eventstream (~> 1.0, >= 1.0.2)
+      aws-partitions (~> 1, >= 1.239.0)
+      aws-sigv4 (~> 1.1)
+      jmespath (~> 1.0)
+    aws-sdk-kms (1.27.0)
+      aws-sdk-core (~> 3, >= 3.71.0)
+      aws-sigv4 (~> 1.1)
+    aws-sdk-s3 (1.60.1)
+      aws-sdk-core (~> 3, >= 3.83.0)
+      aws-sdk-kms (~> 1)
+      aws-sigv4 (~> 1.1)
+    aws-sigv4 (1.1.0)
+      aws-eventstream (~> 1.0, >= 1.0.2)
     clockwork (2.0.4)
       activesupport
       tzinfo
@@ -26,6 +42,7 @@ GEM
       domain_name (~> 0.5)
     i18n (1.7.0)
       concurrent-ruby (~> 1.0)
+    jmespath (1.4.0)
     kgio (2.11.2)
     mechanize (2.7.6)
       domain_name (~> 0.5, >= 0.5.1)
@@ -84,6 +101,7 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord (~> 5.2)
+  aws-sdk-s3 (~> 1.60)
   clockwork (~> 2.0)
   foreman (~> 0.86)
   mechanize (~> 2.7)

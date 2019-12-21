@@ -20,4 +20,18 @@ class Game < ActiveRecord::Base
   def teams
     [visitor, home]
   end
+
+  def completed?
+    final_scores.count == 2
+  end
+
+  def visitor_final_score
+    final = final_scores.find { |score| score.team == visitor }
+    final && final.points
+  end
+
+  def home_final_score
+    final = final_scores.find { |score| score.team == home }
+    final && final.points
+  end
 end

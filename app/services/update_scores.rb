@@ -2,17 +2,18 @@ require 'final_score'
 require 'score'
 require 'season'
 require 'cbs_scores'
+require 'update_results'
 
 class UpdateScores
   def self.perform
-    new.call
+    new.perform
   end
 
   def initialize(cbs_scores: CBSScores.new(Season.current))
     @cbs_scores = cbs_scores
   end
 
-  def call
+  def perform
     in_progress, completed = cbs_scores.scrape
     # Score.transaction do
     #   in_progress.each do |score|
@@ -30,6 +31,8 @@ class UpdateScores
         end
       end
     end
+
+    UpdateResults.perform
   end
 
   private
