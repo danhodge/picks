@@ -33,11 +33,11 @@ ActiveRecord::Schema.define(version: 2019_12_20_030652) do
   end
 
   create_table "games", force: :cascade do |t|
-    t.integer "season_id"
-    t.integer "bowl_id"
+    t.integer "season_id", null: false
+    t.integer "bowl_id", null: false
     t.datetime "game_time", null: false
-    t.integer "visiting_team_id"
-    t.integer "home_team_id"
+    t.integer "visiting_team_id", null: false
+    t.integer "home_team_id", null: false
     t.float "point_spread"
     t.integer "game_type", default: 1, null: false
     t.datetime "created_at", null: false
@@ -50,7 +50,7 @@ ActiveRecord::Schema.define(version: 2019_12_20_030652) do
   end
 
   create_table "participants", force: :cascade do |t|
-    t.integer "season_id"
+    t.integer "season_id", null: false
     t.integer "user_id"
     t.string "nickname", null: false
     t.integer "tiebreaker", null: false
@@ -62,10 +62,10 @@ ActiveRecord::Schema.define(version: 2019_12_20_030652) do
   end
 
   create_table "picks", force: :cascade do |t|
-    t.integer "season_id"
-    t.integer "participant_id"
-    t.integer "game_id"
-    t.integer "team_id"
+    t.integer "season_id", null: false
+    t.integer "participant_id", null: false
+    t.integer "game_id", null: false
+    t.integer "team_id", null: false
     t.integer "points", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -77,8 +77,8 @@ ActiveRecord::Schema.define(version: 2019_12_20_030652) do
   end
 
   create_table "records", force: :cascade do |t|
-    t.integer "season_id"
-    t.integer "team_id"
+    t.integer "season_id", null: false
+    t.integer "team_id", null: false
     t.integer "wins", null: false
     t.integer "losses", null: false
     t.integer "ranking"
@@ -109,7 +109,7 @@ ActiveRecord::Schema.define(version: 2019_12_20_030652) do
   end
 
   create_table "sessions", force: :cascade do |t|
-    t.integer "user_id"
+    t.integer "user_id", null: false
     t.string "token", null: false
     t.datetime "expires_at", null: false
     t.datetime "created_at", null: false

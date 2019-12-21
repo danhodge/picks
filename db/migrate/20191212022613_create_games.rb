@@ -1,11 +1,11 @@
 class CreateGames < ActiveRecord::Migration[5.2]
   def change
     create_table :games do |t|
-      t.references :season
-      t.references :bowl, index: true
+      t.references :season, null: false
+      t.references :bowl, index: true, null: false
       t.datetime :game_time, null: false
-      t.integer :visiting_team_id
-      t.integer :home_team_id
+      t.integer :visiting_team_id, null: false
+      t.integer :home_team_id, null: false
       t.float :point_spread
       t.integer :game_type, null: false, default: 1
 
