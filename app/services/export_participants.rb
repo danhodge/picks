@@ -23,6 +23,7 @@ class ExportParticipants
     end
 
     client.put_object(
+      acl: "public-read",
       bucket: "danhodge-cfb",
       key: "#{season.year}/participants_#{season.year}.json",
       body: participants.to_json

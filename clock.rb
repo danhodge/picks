@@ -14,7 +14,7 @@ module Clockwork
   end
 
   every(1.minute, 'heartbeat') do
-    heartbeat_file = File.expand_path('heartbeat', __FILE__)
+    heartbeat_file = File.expand_path('heartbeat', File.dirname(__FILE__))
     FileUtils.touch(heartbeat_file)
   end
 
