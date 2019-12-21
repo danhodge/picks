@@ -4,7 +4,7 @@ picks
 Usage
 
 ```
-nohup bundle exec unicorn -l <port> -c unicorn.rb &
+nohup bundle exec foreman start&
 ```
 
 Add a Migration
