@@ -1,8 +1,8 @@
-class FinalScore < ActiveRecord::Base
+class Score < ActiveRecord::Base
   belongs_to :game
   belongs_to :team
 
-  validates :points, presence: true
+  validates :points, :quarter, :time_remaining_seconds, presence: true
   validate :check_consistency
 
   private

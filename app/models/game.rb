@@ -16,4 +16,8 @@ class Game < ActiveRecord::Base
   def self.games_for_season(season)
     where(season: season).includes(:bowl, :visitor, :home, { final_scores: [:game, :team] }).order(:game_time, :id)
   end
+
+  def teams
+    [visitor, home]
+  end
 end
