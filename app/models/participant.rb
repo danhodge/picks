@@ -12,6 +12,10 @@ class Participant < ActiveRecord::Base
     end
   end
 
+  def self.participants_for_season(season)
+    where(season: season).includes(picks: [{ game: :bowl }, :team])
+  end
+
   def validate_picks!
     raise "Invalid picks" unless (picks.count == season.games.count) && (picks.map(&:points).sort == (1..season.games.count).to_a)
   end

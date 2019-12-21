@@ -8,6 +8,7 @@ class Game < ActiveRecord::Base
   belongs_to :visitor, class_name: Team.name, foreign_key: :visiting_team_id
   belongs_to :home, class_name: Team.name, foreign_key: :home_team_id
   has_many :final_scores
+  has_many :picks
 
   validates :game_time, presence: true
   validates :game_type, inclusion: { in: [GAME_TYPE_REGULAR, GAME_TYPE_SEMIFINAL, GAME_TYPE_CHAMPIONSHIP] }
