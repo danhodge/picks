@@ -28,12 +28,13 @@ class UpdateResults
       }
     end
 
-    client.put_object(
+    resp = client.put_object(
       acl: "public-read",
       bucket: "danhodge-cfb",
       key: "#{season.year}/results_#{season.year}.json",
       body: results.to_json
     )
+    puts "Updated s3://danhodge-cfb/#{season.year}/results_#{season.year}.json - #{resp}"
   end
 
   private

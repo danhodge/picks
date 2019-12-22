@@ -32,7 +32,7 @@ class CBSScores
 
   private
 
-  attr_reader :games, :agent, :url
+  attr_reader :games, :logger, :agent, :url
 
   def classify_games(games_page)
     groups = {
