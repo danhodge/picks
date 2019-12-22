@@ -7,8 +7,13 @@ class Team < ActiveRecord::Base
     "E." => "Eastern",
     "W." => "Western",
     "La." => "Louisiana",
+    "Ga." => "Georgia",
     "LA" => "Louisiana",
     "Wash." => "Washington"
+  }.freeze
+
+  SUFFIXES = {
+    "St." => "State"
   }.freeze
 
   ABBREVIATIONS = {
@@ -40,6 +45,10 @@ class Team < ActiveRecord::Base
 
     if tokens.count > 1 && PREFIXES.key?(tokens[0])
       tokens[0] = PREFIXES[tokens[0]]
+    end
+
+    if tokens.count > 1 && SUFFIXES.key?(tokens[-1])
+      tokens[-1] = SUFFIXES[tokens[-1]]
     end
 
     if tokens.count > 1 && tokens[-1].start_with?('(') && tokens[-1].end_with?(')') && STATES.key?(tokens[-1][1..-2])
