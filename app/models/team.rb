@@ -12,6 +12,7 @@ class Team < ActiveRecord::Base
   }.freeze
 
   ABBREVIATIONS = {
+    "App. St." => "Appalachian State",
     "FAU" => "Florida Atlantic"
   }.freeze
 
@@ -29,8 +30,8 @@ class Team < ActiveRecord::Base
   def self.normalize_name(name)
     tokens = name.split(" ")
 
-    if tokens.count == 1 && ABBREVIATIONS.key?(tokens[0])
-      return ABBREVIATIONS[tokens[0]]
+    if ABBREVIATIONS.key?(name)
+      return ABBREVIATIONS[name]
     end
 
     if REVERSE_ABBREVIATIONS.key?(name)

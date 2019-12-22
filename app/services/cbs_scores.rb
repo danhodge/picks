@@ -21,13 +21,13 @@ class CBSScores
   def extract_postgame_scores(games_page)
     games = games_page.xpath("//div[contains(@class, 'single-score-card')]")
     groups = classify_games(games)
-    groups[:postgame].map { |game| extract_score(game, no_status: true) }
+    groups[:postgame].map { |game| safe_extract_score(game, no_status: true) }.compact
   end
 
   def extract_in_progress_scores(games_page)
     games = games_page.xpath("//div[contains(@class, 'single-score-card')]")
     groups = classify_games(games)
-    groups[:in_progress].map { |game| extract_score(game) }
+    groups[:in_progress].map { |game| safe_extract_score(game) }.compact
   end
 
   private
@@ -55,6 +55,12 @@ class CBSScores
     end
 
     groups
+  end
+
+  def safe_extract_score(game, no_status: false)
+    extract_score(game, no_status: false)
+  rescue StandardError => ex
+    logger.error "Error extracting score: #{ex.message}\n#{ex.backtrace.join("\n")}"
   end
 
   def extract_score(game, no_status: false)
