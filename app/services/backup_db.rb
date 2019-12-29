@@ -16,17 +16,16 @@ class BackupDB
     db = ActiveRecord::Base.connection.execute("PRAGMA database_list").find { |d| d["name"] == "main" }
 
     if db
-      Tempfile.create("backup") do |tmp_file|
-        `sqlite3 #{db["file"]} .dump > #{tmp_file}`
-        hour = "%02d" % Time.now.hour
-        key = "#{season.year}/backups/db_#{ENV["RACK_ENV"]}_#{hour}.sql"
-        resp = client.put_object(
-          bucket: "danhodge-cfb",
-          key: key,
-          body: File.read(tmp_file)
-        )
-        puts "Backed up database to #{key} - #{resp}"
-      end
+      backup = "/tmp/db.bak"
+      `sqlite3 #{db["file"]} .dump > #{backup}`
+      hour = "%02d" % Time.now.hour
+      key = "#{season.year}/backups/db_#{ENV["RACK_ENV"]}_#{hour}.sql"
+      resp = client.put_object(
+        bucket: "danhodge-cfb",
+        key: key,
+        body: File.read(backup)
+      )
+      puts "Backed up database to #{key} - #{resp}"
     else
       puts "No main database found, not backing up"
     end
