@@ -4,6 +4,7 @@ $LOAD_PATH.unshift(File.expand_path('app/services', File.dirname(__FILE__)))
 
 require 'sinatra/activerecord'
 require 'models'
+require 'backup_db'
 require 'update_scores'
 require 'clockwork'
 require 'fileutils'
@@ -20,5 +21,9 @@ module Clockwork
 
   every(10.minutes, 'update_scores') do
     UpdateScores.perform
+  end
+
+  every(1.hour, 'backup_db') do
+    BackupDB.perform
   end
 end
