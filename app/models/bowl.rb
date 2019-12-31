@@ -12,6 +12,12 @@ class Bowl < ActiveRecord::Base
       "Idaho Potato"
     elsif normalized == "Lending Tree"
       "LendingTree"
+    elsif normalized == "Camelia"
+      "Camellia"
+    elsif normalized == "First Responders"
+      "First Responder"
+    elsif normalized == "Taxslayer"
+      "TaxSlayer"
     else
       normalized
     end

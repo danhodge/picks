@@ -9,7 +9,8 @@ class Team < ActiveRecord::Base
     "La." => "Louisiana",
     "Ga." => "Georgia",
     "LA" => "Louisiana",
-    "Wash." => "Washington"
+    "Wash." => "Washington",
+    "Miss." => "Mississippi"
   }.freeze
 
   SUFFIXES = {
@@ -18,7 +19,8 @@ class Team < ActiveRecord::Base
 
   ABBREVIATIONS = {
     "App. St." => "Appalachian State",
-    "FAU" => "Florida Atlantic"
+    "FAU" => "Florida Atlantic",
+    "CMU" => "Central Michigan"
   }.freeze
 
   REVERSE_ABBREVIATIONS = {
