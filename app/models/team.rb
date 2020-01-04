@@ -20,13 +20,16 @@ class Team < ActiveRecord::Base
   ABBREVIATIONS = {
     "App. St." => "Appalachian State",
     "FAU" => "Florida Atlantic",
-    "CMU" => "Central Michigan"
+    "CMU" => "Central Michigan",
+    "Middle Tennessee" => "Middle Tennessee State"
   }.freeze
 
   REVERSE_ABBREVIATIONS = {
     "Alabama Birmingham" => "UAB",
     "Florida International" => "FIU",
-    "Southern Methodist" => "SMU"
+    "Southern Methodist" => "SMU",
+    "Texas - San Antonio" => "UTSA",
+    "UL Lafayette" => "Louisiana"
   }.freeze
 
   STATES = {
