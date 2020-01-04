@@ -6,8 +6,8 @@ class Bowl < ActiveRecord::Base
     name.downcase.squeeze(" ").include?("national championship")
   end
 
-  def self.normalize_name(name)
-    normalized = strip_sponsors(name.gsub(/ Bowl\z/, ''))
+  def self.normalize_name(name, season: Season.current)
+    normalized = strip_sponsors(name.gsub(/ Bowl\z/, ''), season)
 
     if normalized == "Famous Idaho Potato" || normalized == "Potato"
       "Idaho Potato"
@@ -26,16 +26,19 @@ class Bowl < ActiveRecord::Base
     end
   end
 
-  def self.strip_sponsors(name)
+  def self.strip_sponsors(name, season)
     tokens = name.split(" ")
     if %w(AFR Gildan AutoNation Marmot SDCCU Popeyes Hyundai Zaxby FAM Chick-fil-A Goodyear BW3 Allstate AutoZone Valero).include?(tokens[0])
       tokens.shift
+    elsif (season.year < 2017) && (tokens.take(2) == %w(Camping World))
+      tokens.shift(2)
+    elsif tokens.take(3) == %w(Nova Home Loans)
+      tokens.shift(3)
     elsif [
       %w(Royal Purple),
       %w(Raycom Media),
       %w(RL Carriers),
       %w(New Era),
-      %w(Camping World),
       %w(Lockheed Martin),
       %w(AdoCare V100),
       %w(Capital One),
@@ -43,8 +46,6 @@ class Bowl < ActiveRecord::Base
       %w(Motel 6)
     ].include?(tokens.take(2))
       tokens.shift(2)
-    elsif tokens.take(3) == %w(Nova Home Loans)
-      tokens.shift(3)
     end
 
     tokens.join(" ")
