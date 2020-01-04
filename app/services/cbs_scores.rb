@@ -61,6 +61,7 @@ class CBSScores
     extract_score(game, no_status: false)
   rescue StandardError => ex
     logger.error "Error extracting score: #{ex.message}\n#{ex.backtrace.join("\n")}"
+    nil
   end
 
   def extract_score(game, no_status: false)

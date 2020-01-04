@@ -14,7 +14,12 @@ class UpdateScores
   end
 
   def perform
-    in_progress, completed = cbs_scores.scrape
+    update
+    UpdateResults.perform
+  end
+
+  def update
+    _in_progress, completed = cbs_scores.scrape
     # Score.transaction do
     #   in_progress.each do |score|
     #     Score.where()
@@ -31,8 +36,8 @@ class UpdateScores
         end
       end
     end
-
-    UpdateResults.perform
+  rescue => ex
+    puts "Error scraping scores: #{ex.message} - #{ex.backtrace.join("\n")}"
   end
 
   private
