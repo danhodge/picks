@@ -1,18 +1,17 @@
 class Pick < ActiveRecord::Base
-  belongs_to :season
   belongs_to :participant
   belongs_to :game
   belongs_to :team
+  has_one :season, through: :game
 
   validates :points, presence: true
-  validates :game_id, uniqueness: { scope: [:season_id, :participant_id] }
+  validates :game_id, uniqueness: { scope: [:participant_id] }
   validate :check_consistency
 
   private
 
   def check_consistency
-    errors[:season_id] << "Participant/Season mismatch" unless participant.season == season
-    errors[:game_id] << "Game/Season mismatch" unless game.season == season
+    errors[:season_id] << "Participant/Game Season mismatch" unless participant.season == game.season
 
     if game.game_type == Game::GAME_TYPE_CHAMPIONSHIP
       semi_finalist_ids = Game
