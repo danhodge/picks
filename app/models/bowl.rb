@@ -21,6 +21,8 @@ class Bowl < ActiveRecord::Base
       "TaxSlayer"
     elsif normalized == "St. Pete"
       "St. Petersburg"
+    elsif normalized == "Go Daddy"
+      "Go Daddy"
     else
       normalized
     end
@@ -28,7 +30,9 @@ class Bowl < ActiveRecord::Base
 
   def self.strip_sponsors(name, season)
     tokens = name.split(" ")
-    if %w(AFR Gildan AutoNation Marmot SDCCU Popeyes Hyundai Zaxby FAM Chick-fil-A Goodyear BW3 Allstate AutoZone Valero).include?(tokens[0])
+    if (season.year < 2014) && ((tokens[0] == "Chick-fil-A")  || (tokens.take(2) == %w(Capital One)))
+      # do not strip the sponsor prior to 2014
+    elsif %w(AFR Gildan AutoNation Marmot SDCCU Popeyes Hyundai Zaxby FAM Chick-fil-A Goodyear BW3 Allstate AutoZone Valero).include?(tokens[0])
       tokens.shift
     elsif (season.year < 2017) && (tokens.take(2) == %w(Camping World))
       tokens.shift(2)
@@ -49,9 +53,5 @@ class Bowl < ActiveRecord::Base
     end
 
     tokens.join(" ")
-  end
-
-  def name=(name)
-    super(self.class.normalize_name(name))
   end
 end

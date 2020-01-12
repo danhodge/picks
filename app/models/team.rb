@@ -1,4 +1,6 @@
 class Team < ActiveRecord::Base
+  has_many :records
+
   validates :name, presence: true
 
   PREFIXES = {
@@ -31,7 +33,10 @@ class Team < ActiveRecord::Base
     "Florida International" => "FIU",
     "Southern Methodist" => "SMU",
     "Texas - San Antonio" => "UTSA",
-    "UL Lafayette" => "Louisiana"
+    "UL Lafayette" => "Louisiana",
+    "LA - Lafayette" => "Louisiana",
+    "Central Florida" => "UCF",
+    "Mississippi" => "Ole Miss"
   }.freeze
 
   STATES = {
@@ -75,5 +80,9 @@ class Team < ActiveRecord::Base
 
   def name=(name)
     super(self.class.normalize_name(name))
+  end
+
+  def record(season = Season.current)
+    records.where(season: season).first
   end
 end
