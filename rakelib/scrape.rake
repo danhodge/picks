@@ -10,7 +10,7 @@ namespace :scrape do
   end
 
   task family_fun_schedule: "db:load_config" do
-    FamilyFunSchedule.new(Season.current).scrape
+    FamilyFunSchedule.scrape(Season.current)
   end
 
   task lines: "db:load_config" do

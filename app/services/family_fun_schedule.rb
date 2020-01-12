@@ -9,27 +9,33 @@ class FamilyFunSchedule
     end
   end
 
-
-  def initialize(season, url: 'http://broadjumper.com/family_fun.html')
-    @base_url = url
-    @season = season
-    @logger = Logger.new(STDOUT)
-    @agent = Mechanize.new do |mechanize|
+  def self.scrape(season, url: 'http://broadjumper.com/family_fun.html')
+    agent = Mechanize.new do |mechanize|
       mechanize.user_agent = 'Mac Safari'
-      mechanize.log = @logger
+      mechanize.log = Logger.new(STDOUT)
     end
+
+    new(season, agent.get(url))
+  end
+
+  def initialize(season, page)
+    @season = season
+    @page = page
   end
 
   def scrape
-    create(extract_picks(agent.get("#{base_url}")))
+    create(extract_picks)
   end
 
   def create(results)
     Bowl.transaction do
       games = []
       results[:schedule].each do |result|
-        bowl = Bowl.where(name: Bowl.normalize_name(result[:game])).first_or_create! do |b|
+        bowl = Bowl.where(name: Bowl.normalize_name(result[:game], season: season)).first_or_create! do |b|
           b.city, b.state = result[:location].split(", ")
+          b.city ||= "UNKNOWN"
+          b.state ||= "UNKNOWN"
+          require 'pry'; binding.pry if b.name.empty?
         end
 
         visiting_team = Team.where(name: Team.normalize_name(result[:visitor])).first_or_create!
@@ -66,7 +72,7 @@ class FamilyFunSchedule
     end
   end
 
-  def extract_picks(page)
+  def extract_picks
     table = page.search('//table').first
 
     schedule = []
@@ -113,7 +119,7 @@ class FamilyFunSchedule
 
   private
 
-  attr_reader :base_url, :year_indicator, :logger, :agent, :season
+  attr_reader :page, :year_indicator, :season
 
   def handle_participant(result, cells)
     picks = cells.drop(1).take(result[:schedule].count * 2).each_slice(2).each_with_index.map do |(visitor, home), i|
@@ -128,11 +134,12 @@ class FamilyFunSchedule
     end
 
     name = cells[0].text
-    if picks.length == result[:schedule].length && picks.compact.length == picks.length
-      tie_breaker = cells.drop(3 + (result[:schedule].count * 2)).first.text
+    tie_breaker = cells.drop(3 + (result[:schedule].count * 2)).first.text
+
+    if (picks.length == result[:schedule].length) && (picks.compact.length == picks.length) && !tie_breaker.empty?
       result[:participants] << { name: name, tie_breaker: tie_breaker, picks: picks }
     else
-      logger.error "Ignoring participant: #{name} due to missing picks"
+      puts "Ignoring participant: #{name} due to missing picks or tiebreaker"
     end
   end
 end

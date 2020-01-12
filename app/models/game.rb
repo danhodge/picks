@@ -15,7 +15,7 @@ class Game < ActiveRecord::Base
   validates :bowl_id, uniqueness: { scope: :season_id }
 
   def self.games_for_season(season)
-    where(season: season).includes(:bowl, :visitor, :home, { final_scores: [:game, :team] }).order(:game_time, :id)
+    where(season: season).includes(:bowl, { visitor: :records }, { home: :records }, { final_scores: [:game, :team] }).order(:game_time, :id)
   end
 
   def teams

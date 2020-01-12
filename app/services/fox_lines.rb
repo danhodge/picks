@@ -2,18 +2,22 @@ require 'logger'
 require 'mechanize'
 
 class FoxLines
-  def initialize(season, url: 'http://www.foxsports.com/college-football/odds?group=0&type=2')
-    @season = season
-    @url = url
-    @logger = Logger.new(STDOUT)
-    @agent = Mechanize.new do |mechanize|
+  def self.scrape_and_create(season, url: 'http://www.foxsports.com/college-football/odds?group=0&type=2')
+    agent = Mechanize.new do |mechanize|
       mechanize.user_agent = 'Mac Safari'
-      mechanize.log = @logger
+      mechanize.log = Logger.new(STDOUT)
     end
+
+    new(season, page: agent.get(url)).scrape_and_create
+  end
+
+  def initialize(season, file: nil, page: nil)
+    @season = season
+    @page = page || Mechanize::Page.new(nil, nil, File.read(file), 200, Mechanize.new)
   end
 
   def scrape_and_create
-    update_lines(extract_games(agent.get(url)))
+    update_lines(extract_games(page))
   end
 
   def extract_games(page)
@@ -72,5 +76,5 @@ class FoxLines
 
   private
 
-  attr_reader :logger, :agent, :url, :season
+  attr_reader :page, :season
 end
