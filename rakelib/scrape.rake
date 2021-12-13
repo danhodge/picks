@@ -1,5 +1,6 @@
 require 'season'
 require 'cbs_schedule'
+require 'cbs_lines'
 require 'export_participants'
 require 'family_fun_schedule'
 require 'fox_lines'
@@ -14,7 +15,11 @@ namespace :scrape do
   end
 
   task lines: "db:load_config" do
-    puts FoxLines.new(Season.current).scrape_and_create
+    FoxLines.new(Season.current).scrape_and_create
+  end
+
+  task cbs_lines: "db:load_config" do
+    CBSLines.scrape_and_create(Season.current)
   end
 
   task export_participants: "db:load_config" do
