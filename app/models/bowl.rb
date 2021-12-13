@@ -23,6 +23,12 @@ class Bowl < ActiveRecord::Base
       "St. Petersburg"
     elsif normalized == "Go Daddy"
       "Go Daddy"
+    elsif normalized == "Armed Force"
+      "Armed Forces"
+    elsif normalized == "Dukes Mayo"
+      "Duke's Mayo"
+    elsif normalized == "Tony the Tiger"
+      "Sun"
     else
       normalized
     end
