@@ -15,7 +15,7 @@ class FamilyFunSchedule
       mechanize.log = Logger.new(STDOUT)
     end
 
-    new(season, agent.get(url))
+    new(season, agent.get(url)).scrape
   end
 
   def initialize(season, page)
