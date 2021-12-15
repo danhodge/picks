@@ -54,20 +54,18 @@ class CBSLines
   def update_lines(results)
     Game.transaction do
       results.each do |game_name, date, visitor_name, home_name, point_spread|
-        bowl = find_bowl(game_name)
-        next unless bowl
-
         visitor = Team.find_by!(name: Team.normalize_name(visitor_name))
         home = Team.find_by!(name: Team.normalize_name(home_name))
 
+        bowl = find_bowl!(game_name, visitor, home)
         game = Game.find_by!(season: season, bowl: bowl)
         # not useful without time information
         #raise "Game time mismatch for #{game} - expected #{date}" unless game.game_time.to_date == date
 
         if game.home == home && game.visitor == visitor
-          game.point_spread = point_spread
-        elsif game.home == visitor && game.visitor == home
           game.point_spread = point_spread * -1
+        elsif game.home == visitor && game.visitor == home
+          game.point_spread = point_spread
         else
           raise "Team mismatch for #{game} - expected #{visitor} vs. #{home}"
         end
@@ -89,14 +87,18 @@ class CBSLines
     nil
   end
 
-  def find_bowl(game_name)
-    Bowl.find_by!(name: Bowl.normalize_name(game_name))
-  rescue ActiveRecord::RecordNotFound
-    if game_name.downcase.include?("playoff")
-      # ignore errors resolving playoff games
-      nil
+  def find_bowl!(game_name, visitor, home)
+    if Bowl.semifinal?(game_name)
+      games = Game.where(bowl: Bowl.semifinal_bowls(season), season: season)
+      game = games.find do |g|
+        (g.home == home && g.visitor == visitor) ||
+          (g.home == visitor && g.visitor == home)
+      end
+      raise "No Bowl found for: #{game_name} - #{visitor.name} vs. #{home.name}" unless game
+
+      game.bowl
     else
-      raise
+      Bowl.find_by!(name: Bowl.normalize_name(game_name))
     end
   end
 
