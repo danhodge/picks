@@ -40,6 +40,8 @@ class Bowl < ActiveRecord::Base
       "Duke's Mayo"
     elsif normalized == "Tony the Tiger"
       "Sun"
+    elsif normalized == "Frisco Football Classic"
+      "Frisco Classic"
     else
       normalized
     end

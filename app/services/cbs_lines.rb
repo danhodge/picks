@@ -12,7 +12,7 @@ class CBSLines
     new(season, page: agent.get(url)).scrape_and_create
   end
 
-  GAME_TEAMS_LINE = /(?<game>.+): (?<visitor>.+) vs\. (?<home>.+) \((?<line>[\+-][\d\.]+), [\d\.]+\)/
+  GAME_TEAMS_LINE = /(?<game>.+): (?<visitor>.+) vs\. (?<home>.+) \((?<line>[\+-][\d\.]+)(?:, [\d\.]+)?\)/
 
   def initialize(season, file: nil, page: nil)
     raise ArgumentError, "file or page must be specified" unless file || page
