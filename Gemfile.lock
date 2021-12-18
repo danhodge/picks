@@ -112,6 +112,3 @@ DEPENDENCIES
   sinatra-activerecord (~> 2.0)
   sqlite3
   unicorn
-
-BUNDLED WITH
-   1.16.5

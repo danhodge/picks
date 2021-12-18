@@ -18,8 +18,8 @@ namespace :picks do
           [game.bowl.city, game.bowl.state].join(", "),
           game.visitor.name,
           game.home.name,
-          game.point_spread < 0 ? game.visitor.name : game.home.name,
-          game.point_spread.abs.round(1),
+          game.favored_team.name,
+          game.abs_point_spread,
           "",
           ""
         ]

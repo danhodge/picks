@@ -15,7 +15,7 @@ class FamilyFunSchedule
       mechanize.log = Logger.new(STDOUT)
     end
 
-    new(season, agent.get(url))
+    new(season, agent.get(url)).scrape
   end
 
   def initialize(season, page)
@@ -63,7 +63,7 @@ class FamilyFunSchedule
         end
 
         participant[:picks].zip(games).each do |pick, game|
-          pk = Pick.where(season: season, participant: pt, game: game).first_or_initialize
+          pk = Pick.where(participant: pt, game: game).first_or_initialize
           pk.team = game.teams.find { |t| t.name == Team.normalize_name(pick[:team]) }
           pk.points = pick[:points]
           pk.save!
@@ -135,11 +135,15 @@ class FamilyFunSchedule
 
     name = cells[0].text
     tie_breaker = cells.drop(3 + (result[:schedule].count * 2)).first.text
+    if !tie_breaker || tie_breaker.empty?
+      puts "Defaulting tie breaker to 0 for #{name}"
+      tie_breaker = 0
+    end
 
-    if (picks.length == result[:schedule].length) && (picks.compact.length == picks.length) && !tie_breaker.empty?
+    if (picks.length == result[:schedule].length) && (picks.compact.length == picks.length)
       result[:participants] << { name: name, tie_breaker: tie_breaker, picks: picks }
     else
-      puts "Ignoring participant: #{name} due to missing picks or tiebreaker"
+      puts "Ignoring participant: #{name} due to missing picks"
     end
   end
 end

@@ -6,6 +6,17 @@ class Bowl < ActiveRecord::Base
     name.downcase.squeeze(" ").include?("national championship")
   end
 
+  def self.semifinal?(name)
+    processed_name = name.downcase.squeeze(" ")
+    processed_name.include?("playoff") && processed_name.include?("semifinal")
+  end
+
+  def self.semifinal_bowls(season)
+    if season.year == 2021
+      Bowl.where(name: %w(Cotton Orange))
+    end
+  end
+
   def self.normalize_name(name, season: Season.current)
     normalized = strip_sponsors(name.gsub(/ Bowl\z/, ''), season)
 
@@ -23,6 +34,14 @@ class Bowl < ActiveRecord::Base
       "St. Petersburg"
     elsif normalized == "Go Daddy"
       "Go Daddy"
+    elsif normalized == "Armed Force"
+      "Armed Forces"
+    elsif normalized == "Dukes Mayo"
+      "Duke's Mayo"
+    elsif normalized == "Tony the Tiger"
+      "Sun"
+    elsif normalized == "Frisco Football Classic"
+      "Frisco Classic"
     else
       normalized
     end

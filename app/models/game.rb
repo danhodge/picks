@@ -35,4 +35,19 @@ class Game < ActiveRecord::Base
     final = final_scores.find { |score| score.team == home }
     final && final.points
   end
+
+  def favored_team
+    if point_spread && (point_spread < 0)
+      visitor
+    else
+      # if the point_spread is unknown or even, default the home team as the favorite
+      home
+    end
+  end
+
+  def abs_point_spread
+    return 0 unless point_spread
+
+    point_spread.abs.round(1)
+  end
 end
