@@ -3,7 +3,7 @@ require 'logger'
 require 'game'
 
 class CBSScores
-  def initialize(season, url: 'https://www.cbssports.com/college-football/scoreboard/FBS/2019/postseason/17/')
+  def initialize(season, url: 'https://www.cbssports.com/college-football/scoreboard/FBS/2021/postseason/16/')
     @games = Game.games_for_season(season)
     @url = url
     @logger = Logger.new(STDOUT)

@@ -56,8 +56,9 @@ class EnterPicks
     login_form = page.forms.find do |form|
       form.fields.find { |field| field.name == "pl" && field.value == username }
     end
-    login_form.pswd = password
+    raise "Error: You need to create your user first" unless login_form
 
+    login_form.pswd = password
     result = login_form.submit
     File.open("#{self.class}-#{Time.now.iso8601}-login_result.html", 'w') { |file| file << result.content }
     # errors = result.xpath("//p[text()='bad password/username combination.']")
