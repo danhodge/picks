@@ -42,6 +42,8 @@ class Bowl < ActiveRecord::Base
       "Sun"
     elsif normalized == "Frisco Football Classic"
       "Frisco Classic"
+    elsif normalized == "LA"
+      "L.A."
     else
       normalized
     end
@@ -66,7 +68,8 @@ class Bowl < ActiveRecord::Base
       %w(AdoCare V100),
       %w(Capital One),
       %w(Battle Frog),
-      %w(Motel 6)
+      %w(Motel 6),
+      %w(Jimmy Kimmel)
     ].include?(tokens.take(2))
       tokens.shift(2)
     end

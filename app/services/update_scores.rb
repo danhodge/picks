@@ -35,21 +35,26 @@ class UpdateScores
   def update_in_progress(in_progress)
     Score.transaction do
       in_progress.each do |score|
-        remaining = score[:status][:remaining]
-        mins, secs = remaining.split(":").map(&:to_i)
-        remaining_secs = secs + mins * 60
+        quarter = score[:status][:quarter].gsub(/[^\d]/, "")
+        remaining_secs =
+          if (remaining = score[:status][:remaining])
+            mins, secs = remaining.split(":").map(&:to_i)
+            secs + mins * 60
+          else
+            0
+          end
 
         Score.where(
           game: score[:game],
           team: score[:visitor][:team],
-          quarter: score[:status][:quarter],
+          quarter: quarter,
           time_remaining_seconds: remaining_secs,
           points: score[:visitor][:score]
         ).first_or_create!
         Score.where(
           game: score[:game],
           team: score[:home][:team],
-          quarter: score[:status][:quarter],
+          quarter: quarter,
           time_remaining_seconds: remaining_secs,
           points: score[:home][:score]
         ).first_or_create!

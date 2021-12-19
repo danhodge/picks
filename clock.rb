@@ -20,7 +20,7 @@ module Clockwork
   end
 
   every(10.minutes, 'update_scores') do
-    UpdateScores.perform
+    UpdateScores.perform(Season.current)
   end
 
   every(1.hour, 'backup_db') do
