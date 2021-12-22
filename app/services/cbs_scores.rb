@@ -3,9 +3,17 @@ require 'logger'
 require 'game'
 
 class CBSScores
-  def initialize(season, url: 'https://www.cbssports.com/college-football/scoreboard/FBS/2021/postseason/16/')
+  def initialize(
+        season,
+        urls: [
+          'https://www.cbssports.com/college-football/scoreboard/FBS/2021/postseason/16/',
+          'https://www.cbssports.com/college-football/scoreboard/FBS/2021/postseason/17/',
+          'https://www.cbssports.com/college-football/scoreboard/FBS/2021/postseason/18/',
+          'https://www.cbssports.com/college-football/scoreboard/FBS/2021/postseason/19/'
+        ]
+      )
     @games = Game.games_for_season(season)
-    @url = url
+    @urls = urls
     @logger = Logger.new(STDOUT)
     @agent = Mechanize.new do |mechanize|
       mechanize.user_agent = 'Mac Safari'
@@ -14,8 +22,10 @@ class CBSScores
   end
 
   def scrape
-    page = agent.get(url)
-    [extract_in_progress_scores(page), extract_postgame_scores(page)]
+    urls.reduce([[], []]) do |(in_progress, completed), url|
+      page = agent.get(url)
+      [in_progress + extract_in_progress_scores(page), completed + extract_postgame_scores(page)]
+    end
   end
 
   def extract_postgame_scores(games_page)
@@ -32,7 +42,7 @@ class CBSScores
 
   private
 
-  attr_reader :games, :logger, :agent, :url
+  attr_reader :games, :logger, :agent, :urls
 
   def classify_games(games_page)
     groups = {
