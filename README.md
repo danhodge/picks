@@ -30,7 +30,7 @@ bundle exec rake scrape:family_fun_schedule
 Load the CBS sports point spreads for the current season into the DB
 
 ``` bash
-bundle exec rake scrape:lines
+bundle exec rake scrape:cbs_lines
 ```
 
 Export the participants
