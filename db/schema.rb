@@ -10,12 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-<<<<<<< HEAD
 ActiveRecord::Schema[7.0].define(version: 2022_12_14_132126) do
-=======
-ActiveRecord::Schema.define(version: 2022_01_15_031901) do
-
->>>>>>> 7e9d885 (add column for tracking game status (cancelled or not))
   create_table "bowls", force: :cascade do |t|
     t.string "name", null: false
     t.string "city"
@@ -57,13 +52,8 @@ ActiveRecord::Schema.define(version: 2022_01_15_031901) do
     t.integer "home_team_id", null: false
     t.float "point_spread"
     t.integer "game_type", default: 1, null: false
-<<<<<<< HEAD
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
-=======
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
->>>>>>> 7e9d885 (add column for tracking game status (cancelled or not))
     t.integer "game_status", default: 1
     t.index ["bowl_id"], name: "index_games_on_bowl_id"
     t.index ["home_team_id"], name: "index_games_on_home_team_id"
