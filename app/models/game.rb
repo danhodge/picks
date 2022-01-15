@@ -3,6 +3,9 @@ class Game < ActiveRecord::Base
   GAME_TYPE_SEMIFINAL = 2
   GAME_TYPE_CHAMPIONSHIP = 3
 
+  GAME_STATUS_NORMAL = 1
+  GAME_STATUS_CANCELLED = 2
+
   belongs_to :season
   belongs_to :bowl
   belongs_to :visitor, class_name: Team.name, foreign_key: :visiting_team_id
@@ -12,6 +15,7 @@ class Game < ActiveRecord::Base
 
   validates :game_time, presence: true
   validates :game_type, inclusion: { in: [GAME_TYPE_REGULAR, GAME_TYPE_SEMIFINAL, GAME_TYPE_CHAMPIONSHIP] }
+  validates :game_status, inclusion: { in: [GAME_STATUS_NORMAL, GAME_STATUS_CANCELLED] }
   validates :bowl_id, uniqueness: { scope: :season_id }
 
   def self.games_for_season(season)
@@ -23,7 +27,7 @@ class Game < ActiveRecord::Base
   end
 
   def completed?
-    final_scores.count == 2
+    final_scores.count == 2 || game_status == GAME_STATUS_CANCELLED
   end
 
   def visitor_final_score
