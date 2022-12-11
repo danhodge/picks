@@ -94,6 +94,7 @@ class CBSSchedule
           b.state = state
         end
 
+        begin
         if game_type != Game::GAME_TYPE_CHAMPIONSHIP
           visiting_team = Team.where(name: Team.normalize_name(visitor[:name])).first_or_create!
           Record.where(season: season, team: visiting_team).update!(ranking: visitor[:ranking]) if visitor[:ranking]
@@ -108,7 +109,12 @@ class CBSSchedule
             g.game_time = game_time
             g.game_type = game_type
           end
+          binding.pry if game.visitor != visiting_team || game.home != home_team
+
           puts "Created game: #{game.attributes}"
+        end
+        rescue => ex
+          binding.pry
         end
       end
     end
@@ -153,6 +159,9 @@ class CBSSchedule
     result[:ranking] = raw_ranking[1..-2].to_i if raw_ranking
 
     result
+  rescue => ex
+    binding.pry
+    raise
   end
 
   def normalize_nbsp(str)

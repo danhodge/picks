@@ -31,7 +31,8 @@ class CBSGames
     groups = {
       in_progress: [],
       pregame: [],
-      postgame: []
+      postgame: [],
+      cancelled: []
     }
 
     games.each do |game|
@@ -40,8 +41,12 @@ class CBSGames
 
       if !game.xpath("div/div/div[contains(@class, 'pregame')]").empty?
         groups[:pregame] << game
-      elsif !game.xpath("div/div/div[contains(@class, 'postgame')]").empty?
-        groups[:postgame] << game
+      elsif !(postgame = game.xpath("div/div/div[contains(@class, 'postgame')]")).empty?
+        if postgame.text.downcase.start_with?("final")
+          groups[:postgame] << game
+        else
+          groups[:cancelled] << game
+        end
       else
         groups[:in_progress] << game
       end
