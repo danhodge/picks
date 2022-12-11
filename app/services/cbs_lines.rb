@@ -3,7 +3,7 @@ require 'mechanize'
 require 'pry'
 
 class CBSLines
-  def self.scrape_and_create(season, url: "https://www.cbssports.com/college-football/news/college-football-odds-lines-predictions-for-bowl-season-2021-22-proven-simulation-picks-oklahoma-auburn/")
+  def self.scrape_and_create(season, url: "https://www.cbssports.com/college-football/news/college-football-odds-lines-predictions-for-the-2022-23-bowl-season-proven-model-picks-washington-usc/")
     agent = Mechanize.new do |mechanize|
       mechanize.user_agent = 'Mac Safari'
       mechanize.log = Logger.new(STDOUT)
@@ -37,11 +37,14 @@ class CBSLines
         cur_date = date
       elsif cur_date
         if match = GAME_TEAMS_LINE.match(child.text)
+          name_tokens = match[:game].split(" ")
+          name_tokens.shift if name_tokens[0] == Season.current.year.to_s || (Season.current.year + 1).to_s
+
           results << [
-            match[:game],
+            name_tokens.join(" "),
             cur_date,
-            match[:visitor],
-            match[:home],
+            strip_ranking(match[:visitor]),
+            strip_ranking(match[:home]),
             Float(match[:line])
           ]
         end
@@ -67,7 +70,7 @@ class CBSLines
         elsif game.home == visitor && game.visitor == home
           game.point_spread = point_spread
         else
-          raise "Team mismatch for #{game} - expected #{visitor} vs. #{home}"
+          raise "Team mismatch for #{game.bowl.name} - expected #{visitor.name} vs. #{home.name}"
         end
         game.save!
       end
@@ -77,7 +80,7 @@ class CBSLines
   private
 
   def parse_date(raw_date)
-    time = Time.strptime(raw_date, "%b. %d:")
+    time = Time.strptime(raw_date, "%A, %b. %d")
     if time < Time.now
       time = time.next_year
     end
@@ -85,6 +88,15 @@ class CBSLines
     time.to_date
   rescue ArgumentError
     nil
+  end
+
+  def strip_ranking(team_name)
+    team_tokens = team_name.split(" ")
+    if team_tokens[0] == "No." && team_tokens[1] =~ /^\d+$/
+      team_tokens[2..].join(" ")
+    else
+      team_name
+    end
   end
 
   def find_bowl!(game_name, visitor, home)
