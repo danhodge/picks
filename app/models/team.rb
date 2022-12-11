@@ -34,7 +34,8 @@ class Team < ActiveRecord::Base
     "App. State" => "Appalachian State",
     "NIU" => "Northern Illinois",
     "ECU" => "East Carolina",
-    "UNC" => "North Carolina"
+    "UNC" => "North Carolina",
+    "Pitt" => "Pittsburgh"
   }.freeze
 
   REVERSE_ABBREVIATIONS = {
@@ -48,7 +49,8 @@ class Team < ActiveRecord::Base
     "Central Florida" => "UCF",
     "Mississippi" => "Ole Miss",
     "Miami Florida" => "Miami (FL)",
-    "Miami Ohio" => "Miami (OH)"
+    "Miami Ohio" => "Miami (OH)",
+    "Southern Mississippi" => "Southern Miss"
   }.freeze
 
   STATES = {

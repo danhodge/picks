@@ -1,6 +1,9 @@
 require 'mechanize'
 require 'logger'
+require 'agent_ext'
 require 'bowl'
+
+using SuppressLanguageCharset
 
 class FamilyFunSchedule
   Result = Struct.new(:games, :participants) do
@@ -9,7 +12,7 @@ class FamilyFunSchedule
     end
   end
 
-  def self.scrape(season, url: 'http://broadjumper.com/family_fun.html')
+  def self.scrape(season, url: 'https://broadjumper.com/family_fun.html')
     agent = Mechanize.new do |mechanize|
       mechanize.user_agent = 'Mac Safari'
       mechanize.log = Logger.new(STDOUT)
