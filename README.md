@@ -13,18 +13,18 @@ Add a Migration
 bundle exec rake db:create_migration NAME=create_table
 ```
 
-Setup
+Setup (run these tasks in the following order)
 
 Load the CBS sports schedule for the current season into the DB
-
-``` bash
-bundle exec rake scrape:schedule
-```
 
 Load the Family Fun schedule for the current season into the DB
 
 ``` bash
 bundle exec rake scrape:family_fun_schedule
+```
+
+``` bash
+bundle exec rake scrape:schedule
 ```
 
 Load the CBS sports point spreads for the current season into the DB

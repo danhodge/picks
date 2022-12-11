@@ -77,7 +77,6 @@ class CBSSchedule
           [game_name, nil, nil, nil, nil, game_time, Game::GAME_TYPE_CHAMPIONSHIP]
         else
           city, state = self.class.normalize_location(raw_location)
-          require 'pry'; binding.pry unless city && state
           visitor, home = matchup.text.split("vs.").map { |value| parse_team(value.strip) }
           [game_name, city, state, visitor, home, game_time, (i == 0) ? Game::GAME_TYPE_SEMIFINAL : Game::GAME_TYPE_REGULAR]
         end
@@ -90,7 +89,7 @@ class CBSSchedule
       scrape.map do |game_name, city, state, visitor, home, game_time, game_type|
         next if game_type == Game::GAME_TYPE_CHAMPIONSHIP
 
-        bowl = Bowl.where(name: game_name).first_or_create! do |b|
+        bowl = Bowl.where(name: Bowl.normalize_name(game_name)).first_or_create! do |b|
           b.city = city
           b.state = state
         end
