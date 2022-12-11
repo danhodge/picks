@@ -13,7 +13,7 @@ gem "rake"
 gem "sinatra", "~> 2.0"
 gem "sinatra-activerecord", "~> 2.0"
 gem "sqlite3"
-gem "unicorn"
+gem "unicorn", "~> 6.1.0"
 
 group :development, :test do
   gem "pry"
