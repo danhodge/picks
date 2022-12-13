@@ -81,4 +81,12 @@ class Bowl < ActiveRecord::Base
 
     tokens.join(" ")
   end
+
+  def normalize_location(city, state)
+    if name == "ReliaQuest" && !city && !state
+      ["Tampa", "FL"]
+    else
+      [city, state]
+    end
+  end
 end

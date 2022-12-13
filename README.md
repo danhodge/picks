@@ -33,6 +33,18 @@ Load the CBS sports point spreads for the current season into the DB
 bundle exec rake scrape:cbs_lines
 ```
 
+Generate Blank Picks CSV
+
+```bash
+bundle exec rake picks:generate_csv
+```
+
+Generate Picks CSV with Choices
+
+```bash
+bundle exec rake "picks:generate_choices[randomness_score]"
+```
+
 Export the participants
 
 ``` bash

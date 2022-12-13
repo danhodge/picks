@@ -35,10 +35,8 @@ class FamilyFunSchedule
       games = []
       results[:schedule].each do |result|
         bowl = Bowl.where(name: Bowl.normalize_name(result[:game], season: season)).first_or_create! do |b|
-          b.city, b.state = result[:location].split(", ")
-          b.city ||= "UNKNOWN"
-          b.state ||= "UNKNOWN"
-          require 'pry'; binding.pry if b.name.empty?
+          city, state = result[:location].split(", ")
+          b.city, b.state = b.normalize_location(city, state)
         end
 
         visiting_team = Team.where(name: Team.normalize_name(result[:visitor])).first_or_create!
