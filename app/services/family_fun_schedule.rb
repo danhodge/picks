@@ -1,9 +1,6 @@
 require 'mechanize'
 require 'logger'
-require 'agent_ext'
 require 'bowl'
-
-using SuppressLanguageCharset
 
 class FamilyFunSchedule
   Result = Struct.new(:games, :participants) do
@@ -16,6 +13,11 @@ class FamilyFunSchedule
     agent = Mechanize.new do |mechanize|
       mechanize.user_agent = 'Mac Safari'
       mechanize.log = Logger.new(STDOUT)
+    end
+
+    agt = agent.instance_variable_get('@agent')
+    def agt.request_language_charset(req)
+      # no-op
     end
 
     new(season, agent.get(url)).scrape

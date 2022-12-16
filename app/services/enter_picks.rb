@@ -1,10 +1,7 @@
 require 'logger'
 require 'mechanize'
-require 'agent_ext'
 require 'season'
 require 'game'
-
-using SuppressLanguageCharset
 
 class EnterPicks
   def initialize(user:, password:, url: 'https://broadjumper.com/add_participant.html', season: Season.current)
@@ -14,6 +11,12 @@ class EnterPicks
       mechanize.user_agent = 'Mac Safari'
       mechanize.log = @logger
     end
+
+    agt = agent.instance_variable_get('@agent')
+    def agt.request_language_charset(req)
+      # no-op
+    end
+
     @user = user
     @password = password
     @season = season
