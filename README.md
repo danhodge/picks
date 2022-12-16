@@ -45,6 +45,18 @@ Generate Picks CSV with Choices
 bundle exec rake "picks:generate_choices[randomness_score]"
 ```
 
+Create User
+
+```bash
+bundle exec rake "user:create[<email>,<name>,<nickname>,<phone_number>]"
+```
+
+Submit Picks
+
+```bash
+bundle exec rake "picks:generate_and_submit[<csv_path>,<tie_breaker>,<nickname>,<password>]"
+```
+
 Export the participants
 
 ``` bash
