@@ -27,6 +27,7 @@ class Team < ActiveRecord::Base
     "MSU" => "Michigan State",
     "Middle Tennessee" => "Middle Tennessee State",
     "Miami FL" => "Miami (FL)",
+    "Miami-OH" => "Miami (OH)",
     "MTSU" => "Middle Tennessee State",
     "Middle Tenn." => "Middle Tennessee State",
     "C. Carolina" => "Coastal Carolina",
