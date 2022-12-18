@@ -37,7 +37,7 @@ class Team < ActiveRecord::Base
     "ECU" => "East Carolina",
     "UNC" => "North Carolina",
     "Pitt" => "Pittsburgh",
-    "So. Miss " => "Southern Miss",
+    "So. Miss" => "Southern Miss",
   }.freeze
 
   REVERSE_ABBREVIATIONS = {
