@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import internal from 'stream';
 import { TemplateExpression, textChangeRangeIsUnchanged } from 'typescript';
 import './App.css';
-import Game from './Game';
+import GameComponent from './Game';
 
 /*export interface TeamWithScore {
   name: string;
@@ -53,6 +53,11 @@ export interface Participant {
   picks: Array<Pick>;
 }
 
+export interface Data {
+  games: Array<Game>;
+  participants: Array<Participant>;
+}
+
 const unknownGame = () => {
   return {} as Game;
 }
@@ -90,9 +95,10 @@ const loadScores = (game: Game, team: Team, data: any) => {
 }
 
 const loadPick = (data: any, games: Map<string, Game>) => {
+  const game = games.get(data.game_name) || unknownGame();
   const pick: Pick = {
-    game: games.get(data.game_name) || unknownGame(),
-    team: data.team_name,
+    game: game,
+    team: data.team_name === game.home.name ? game.home : game.visitor,
     points: parseInt(data.points)
   }
 
@@ -112,34 +118,44 @@ const loadParticipant = (data: any, games: Map<string, Game>) => {
 const reconcile = (games: Array<Game>, participants: Array<Participant>) => {
   games.forEach(game => {
     const allPicks = participants.flatMap(p => p.picks);
-    game.totalPoints = allPicks.reduce((acc, cur) => acc + (cur.game === game ? cur.points : 0), 0);
+    const gamePicks = allPicks.filter(pick => pick.game === game);
+    game.totalPoints = gamePicks.reduce((acc, cur) => acc + cur.points, 0);
     if (isCompleted(game)) {
-      game.totalPointsWon = allPicks.reduce((acc, cur) => acc + ((cur.game === game && cur.team === winner(game)) ? cur.points : 0), 0);
+      const winning = winner(game);
+      console.log(`Reconciling for winning team ${winning && winning.name}`);
+      game.totalPointsWon = gamePicks.reduce((acc, cur) => acc + (cur.team === winning ? cur.points : 0), 0);
     }
   });
 }
 
-const isCompleted = (game: Game) => {
-  return game.scores.map(score => score.team)
+export const isCompleted = (game: Game) => {
+  return scoreForTeam(game, game.visitor) && scoreForTeam(game, game.home);
 };
 
-const scoreForTeam = (game: Game, targetTeam: Team) => {
+export const scoreForTeam = (game: Game, targetTeam: Team) => {
   const scores = game.scores.filter(score => score.team === targetTeam);
   if (scores.length === 0) {
-    return unknownScore();
+    return undefined;
   } else {
-    return scores[0];
+    return scores[0].score;
   }
 };
 
-const winner = (game: Game) => {
+// TODO: turn into a game result (win, loss, tie, etc)?
+export const winner = (game: Game) => {
   if (!isCompleted(game)) {
-    return unknownTeam();
+    return undefined;
   }
-  const visitorScore = scoreForTeam(game.visitor);
-  const homeScore = scoreForTeam(game.home);
+  const visitorScore = scoreForTeam(game, game.visitor);
+  const homeScore = scoreForTeam(game, game.home);
 
-  if ()
+  if (visitorScore && homeScore && visitorScore > homeScore) {
+    return game.visitor;
+  } else if (visitorScore && homeScore && homeScore > visitorScore) {
+    return game.home;
+  } else {
+    return undefined;
+  }
 };
 
 
@@ -235,19 +251,19 @@ export interface GameStats {
 }
 */
 
-export const computeGameStats = (data: Data, game: GameData) => {
-  const allPicks = data.participants.flatMap(p => p.picks).filter(p => p.game === game);
-  const total = allPicks.reduce((acc, cur) => acc + cur.points, 0);
-  const median = medianPickForGame(data, game);
+// export const computeGameStats = (data: Data, game: Game) => {
+//   const allPicks = data.participants.flatMap(p => p.picks).filter(p => p.game === game);
+//   const total = allPicks.reduce((acc, cur) => acc + cur.points, 0);
+//   const median = medianPickForGame(data, game);
 
-  if (game.completed()) {
-    const totalWon = allPicks.filter(pick => pick.team === game.winner()).map(pick => pick.points).reduce((acc, cur) => acc + cur, 0);
-  }
-};
+//   if (isCompleted(game)) {
+//     const totalWon = allPicks.filter(pick => pick.team === winner(game)).map(pick => pick.points).reduce((acc, cur) => acc + cur, 0);
+//   }
+// };
 
-export const averagePickForGame = (data: Data, game: GameData) => {
+export const averagePickForGame = (data: Data, game: Game) => {
   const allPicks = data.participants.flatMap(p => p.picks).filter(p => p.game === game);
-  const sum = allPicks.reduce((acc, cur) => acc + (cur.team === game.visitor.name ? -cur.points : cur.points), 0);
+  const sum = allPicks.reduce((acc, cur) => acc + (cur.team === game.visitor ? -cur.points : cur.points), 0);
   const avg = sum / allPicks.length;
   if (avg < 0) {
     return { team: game.visitor.name, points: -avg.toFixed(2) };
@@ -256,9 +272,9 @@ export const averagePickForGame = (data: Data, game: GameData) => {
   }
 };
 
-export const medianPickForGame = (data: Data, game: GameData) => {
+export const medianPickForGame = (data: Data, game: Game) => {
   const allPicks = data.participants.flatMap(p => p.picks).filter(p => p.game === game);
-  const sortedPoints = allPicks.map(pick => pick.team === game.visitor.name ? -pick.points : pick.points).sort((x, y) => x - y);
+  const sortedPoints = allPicks.map(pick => pick.team === game.visitor ? -pick.points : pick.points).sort((x, y) => x - y);
   const medianPoints = sortedPoints[Math.floor(sortedPoints.length / 2)];
   if (medianPoints < 0) {
     return { team: game.visitor.name, points: -medianPoints };
@@ -271,14 +287,15 @@ const queryClient = new QueryClient();
 
 const fetchResults = async () => {
   const res1 = Promise.all([
-    fetch("https://danhodge-cfb.s3.amazonaws.com/2022/results_2022.json"),
-    fetch("https://danhodge-cfb.s3.amazonaws.com/2022/participants_2022.json")
+    fetch("http://localhost:5000/results.json"),
+    fetch("http://localhost:5000/participants.json")
   ]).then(([r1, r2]) => [r1.json(), r2.json()])
     .then(async ([a, b]) => {
-      const games: Array<GameData> = (await a).map(loadGameData);
-      const gamesMap = new Map<string, GameData>();
+      const games: Array<Game> = (await a).map(loadGame);
+      const gamesMap = new Map<string, Game>();
       games.forEach(game => gamesMap.set(game.name, game));
       const participants: Array<Participant> = (await b).map((participant: any) => loadParticipant(participant, gamesMap));
+      reconcile(games, participants);
       const data: Data = { games: games, participants: participants };
 
       return data;
@@ -309,11 +326,13 @@ function Shell() {
   //   });
   // });
 
+  const game = data && data.games[2];
+
   return isLoading ?
     <div className="App">Loading...</div> :
-    (data ?
+    (game ?
       <div>
-        {data.games.map((game: GameData) => <div><Game data={data} game={game} /></div>)}
+        <div><GameComponent data={data} game={game} /></div>
       </div> : <div>?</div>);
 }
 
