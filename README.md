@@ -57,6 +57,11 @@ Submit Picks
 bundle exec rake "picks:generate_and_submit[<csv_path>,<tie_breaker>,<nickname>,<password>]"
 ```
 
+Deploy
+
+1. Copy prod db
+2. Re-run 1-3 with RACK_ENV=production
+
 Export the participants
 
 ``` bash
