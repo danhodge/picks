@@ -53,7 +53,7 @@ class CBSSchedule
     [city, state]
   end
 
-  def initialize(season, url: "https://www.cbssports.com/college-football/news/#{season.name}-college-football-bowl-schedule-games-dates-locations-tv-channels-kickoff-times/")
+  def initialize(season, url: "https://www.cbssports.com/college-football/news/#{season.name}-college-football-bowl-schedule-games-scores-dates-tv-channels-kickoff-times-locations/")
     @season = season
     @url = url
     @logger = Logger.new(STDOUT)
@@ -77,7 +77,6 @@ class CBSSchedule
           [game_name, nil, nil, nil, nil, game_time, Game::GAME_TYPE_CHAMPIONSHIP]
         else
           city, state = self.class.normalize_location(raw_location)
-          require 'pry'; binding.pry unless city && state
           visitor, home = matchup.text.split("vs.").map { |value| parse_team(value.strip) }
           [game_name, city, state, visitor, home, game_time, (i == 0) ? Game::GAME_TYPE_SEMIFINAL : Game::GAME_TYPE_REGULAR]
         end
@@ -90,25 +89,17 @@ class CBSSchedule
       scrape.map do |game_name, city, state, visitor, home, game_time, game_type|
         next if game_type == Game::GAME_TYPE_CHAMPIONSHIP
 
-        bowl = Bowl.where(name: game_name).first_or_create! do |b|
+        bowl = Bowl.where(name: Bowl.normalize_name(game_name)).first_or_create! do |b|
           b.city = city
           b.state = state
         end
 
         if game_type != Game::GAME_TYPE_CHAMPIONSHIP
           visiting_team = Team.where(name: Team.normalize_name(visitor[:name])).first_or_create!
-          Record.where(season: season, team: visiting_team).first_or_create! do |v|
-            v.wins = visitor[:wins]
-            v.losses = visitor[:losses]
-            v.ranking = visitor[:ranking]
-          end
+          Record.where(season: season, team: visiting_team).update!(ranking: visitor[:ranking]) if visitor[:ranking]
 
           home_team = Team.where(name: Team.normalize_name(home[:name])).first_or_create!
-          Record.where(season: season, team: home_team).first_or_create! do |v|
-            v.wins = home[:wins]
-            v.losses = home[:losses]
-            v.ranking = home[:ranking]
-          end
+          Record.where(season: season, team: home_team).update!(ranking: home[:ranking]) if home[:ranking]
 
           # TODO: how to create championship game?
           game = Game.where(season: season, bowl: bowl).first_or_create! do |g|
@@ -129,7 +120,7 @@ class CBSSchedule
 
   def to_time(date, time)
     time = "12:00 pm" if time.downcase.include?("noon")
-    time = "8:00 pm" if time.include?("TBA")
+    time = "8:00 pm" if time.include?("TBA") || time.include?("TBD")
 
     hm, meridian = time.split(" ").take(2)
     hm = "#{hm}:00" unless hm.include?(":")
@@ -156,12 +147,10 @@ class CBSSchedule
 
   def parse_team(team_str)
     tokens = normalize_nbsp(team_str).split(' ')
-    raw_record = tokens.pop
     raw_ranking = tokens.shift if tokens[0].start_with?('(')
 
     result = { name: tokens.join(' ') }
     result[:ranking] = raw_ranking[1..-2].to_i if raw_ranking
-    result[:wins], result[:losses] = raw_record[1..-2].split('-').map(&:to_i)
 
     result
   end

@@ -18,7 +18,10 @@ class Bowl < ActiveRecord::Base
   end
 
   def self.normalize_name(name, season: Season.current)
-    normalized = strip_sponsors(name.gsub(/ Bowl\z/, ''), season)
+    cleaned = name.gsub(/[[:space:]]+semifinal\z/, '')
+    normalized = strip_sponsors(cleaned.gsub(/[[:space:]]+Bowl\z/, ''), season)
+    # like rstrip but also removes nbsp characters
+    normalized = normalized.gsub(/[[:space:]]+\z/, '')
 
     if normalized == "Famous Idaho Potato" || normalized == "Potato"
       "Idaho Potato"
@@ -44,6 +47,8 @@ class Bowl < ActiveRecord::Base
       "Frisco Classic"
     elsif normalized == "LA"
       "L.A."
+    elsif normalized == "Hawai'i"
+      "Hawaii"
     else
       normalized
     end
@@ -75,5 +80,13 @@ class Bowl < ActiveRecord::Base
     end
 
     tokens.join(" ")
+  end
+
+  def normalize_location(city, state)
+    if name == "ReliaQuest" && !city && !state
+      ["Tampa", "FL"]
+    else
+      [city, state]
+    end
   end
 end

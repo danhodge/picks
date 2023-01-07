@@ -4,19 +4,31 @@ require 'season'
 require 'game'
 
 class EnterPicks
-  def initialize(username:, password:, url: 'http://broadjumper.com/add_participant.html', season: Season.current)
+  def initialize(user:, password:, url: 'https://broadjumper.com/add_participant.html', season: Season.current)
     @url = url
     @logger = Logger.new(STDOUT)
     @agent = Mechanize.new do |mechanize|
       mechanize.user_agent = 'Mac Safari'
       mechanize.log = @logger
     end
-    @enter_picks_page = login(username, password)
+
+    agt = agent.instance_variable_get('@agent')
+    def agt.request_language_charset(req)
+      # no-op
+    end
+
+    @user = user
+    @password = password
     @season = season
   end
 
   def submit_picks(choices, tie_breaker)
-    games = parse_table
+    login_form = find_login_form_or_create_user(user)
+    raise "Unable to login user: #{user.nickname}" unless login_form
+
+    enter_picks_page = login(login_form)
+
+    games = parse_table(enter_picks_page)
     form = enter_picks_page.forms.first
 
     games.each_with_index do |game, i|
@@ -48,16 +60,42 @@ class EnterPicks
 
   private
 
-  attr_reader :url, :agent, :enter_picks_page, :season
+  attr_reader :url, :agent, :season, :user, :password
 
-  def login(username, password)
+  def find_login_form_or_create_user(user)
     page = agent.get(url)
-    File.open("#{self.class}-#{Time.now.iso8601}-login_page.html", 'w') { |file| file << page.content }
-    login_form = page.forms.find do |form|
-      form.fields.find { |field| field.name == "pl" && field.value == username }
+    if login_form = find_login_form(page, user)
+      login_form
+    else
+      find_login_form(create_user(page, user), user)
     end
-    raise "Error: You need to create your user first" unless login_form
+  end
 
+  def find_login_form(page, user)
+    File.open("#{self.class}-#{Time.now.iso8601}-login_page.html", 'w') { |file| file << page.content }
+
+    page.forms.find do |form|
+      form.fields.find { |field| field.name == "pl" && field.value == user.nickname }
+    end
+  end
+
+  def create_user(page, user)
+    File.open("#{self.class}-#{Time.now.iso8601}-login_page.html", 'w') { |file| file << page.content }
+    create_form = page.forms.find { |form| form.action != "picks.html" }
+
+    create_form.nick = user.nickname
+    create_form.password = password
+    create_form.uname = user.name
+    create_form.email = user.email
+    create_form.phone = user.phone_number
+    create_form['submit'] = 'Submit'
+    result = create_form.submit
+    File.open("#{self.class}-#{Time.now.iso8601}-login_result.html", 'w') { |file| file << result.content }
+
+    result
+  end
+
+  def login(login_form)
     login_form.pswd = password
     result = login_form.submit
     File.open("#{self.class}-#{Time.now.iso8601}-login_result.html", 'w') { |file| file << result.content }
@@ -67,7 +105,7 @@ class EnterPicks
     result
   end
 
-  def parse_table
+  def parse_table(enter_picks_page)
     all_rows = enter_picks_page.xpath("//table/tr").take_while do |row|
       row.text && !row.text.strip.start_with?("Tie Breaker")
     end

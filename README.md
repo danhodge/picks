@@ -13,13 +13,9 @@ Add a Migration
 bundle exec rake db:create_migration NAME=create_table
 ```
 
-Setup
+Setup (run these tasks in the following order)
 
 Load the CBS sports schedule for the current season into the DB
-
-``` bash
-bundle exec rake scrape:schedule
-```
 
 Load the Family Fun schedule for the current season into the DB
 
@@ -27,11 +23,44 @@ Load the Family Fun schedule for the current season into the DB
 bundle exec rake scrape:family_fun_schedule
 ```
 
+``` bash
+bundle exec rake scrape:schedule
+```
+
 Load the CBS sports point spreads for the current season into the DB
 
 ``` bash
 bundle exec rake scrape:cbs_lines
 ```
+
+Generate Blank Picks CSV
+
+```bash
+bundle exec rake picks:generate_csv
+```
+
+Generate Picks CSV with Choices
+
+```bash
+bundle exec rake "picks:generate_choices[randomness_score]"
+```
+
+Create User
+
+```bash
+bundle exec rake "user:create[<email>,<name>,<nickname>,<phone_number>]"
+```
+
+Submit Picks
+
+```bash
+bundle exec rake "picks:generate_and_submit[<csv_path>,<tie_breaker>,<nickname>,<password>]"
+```
+
+Deploy
+
+1. Copy prod db
+2. Re-run 1-3 with RACK_ENV=production
 
 Export the participants
 
