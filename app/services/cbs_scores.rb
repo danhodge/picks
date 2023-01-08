@@ -18,7 +18,8 @@ class CBSGames
   def each_completed
     return enum_for(:each_completed) unless block_given?
 
-    classify_games[:postgame].each do |game_element|
+    classified = classify_games
+    (classified[:postgame] + classified[:cancelled]).each do |game_element|
       yield extract_data(game_element)
     end
   end
@@ -85,6 +86,8 @@ class CBSGames
       { quarter: "final" }
     elsif status.downcase == "halftime"
       { quarter: "halftime" }
+    elsif status.downcase == "cancelled"
+      { quarter: "cancelled" }
     elsif (match = /(\d)\w{2}\s+(\d{1,2}:\d{2})/.match(status))
       { quarter: match[1], remaining: match[2] }
     else
