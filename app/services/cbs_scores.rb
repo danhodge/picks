@@ -115,6 +115,11 @@ class CBSScores
   end
 
   def scrape
+    in_progress, completed = scrape_results
+    [in_progress, cancel_missing_games(completed)]
+  end
+
+  def scrape_results
     urls.reduce([[], []]) do |(in_progress, completed), url|
       cbs_games = CBSGames.new(agent.get(url))
       [
@@ -124,9 +129,20 @@ class CBSScores
     end
   end
 
+  def cancel_missing_games(completed, now: Time.now)
+    expected_complete = games.filter { |game| now > (game.game_time + 1.day) }
+    assumed_cancelled = expected_complete - completed.map { |result| result[:game] }
+
+    completed + assumed_cancelled.map { |game| { game: game, status: "assumed_cancelled" } }
+  end
+
   private
 
   attr_reader :games, :logger, :agent, :urls
+
+  def season
+    games.first.season
+  end
 
   def safe_score(result, no_status: false)
     score(result, no_status: false)
@@ -136,21 +152,28 @@ class CBSScores
   end
 
   def score(result, no_status: false)
-    game_record = games.find { |g| g.bowl.name == Bowl.normalize_name(result[:game_name].split(",").first) }
+    game_record = games.find { |g| g.bowl.name == Bowl.normalize_name(result[:game_name].split(",").first, season: season) }
     raise "No game found for: #{result[:game_name]}" unless game_record
 
-    visitor = game_record.teams.find { |t| t.name == Team.normalize_name(result[:visitor][:team_name]) }
-    raise "No team found for: #{result[:visitor][:team_name]}" unless visitor
-    home = game_record.teams.find { |t| t.name == Team.normalize_name(result[:home][:team_name]) }
-    raise "No team found for: #{result[:home][:team_name]}" unless home
+    if result[:status][:quarter] == "cancelled"
+      {
+        game: game_record,
+        status: "cancelled"
+      }
+    else
+      visitor = game_record.teams.find { |t| t.name == Team.normalize_name(result[:visitor][:team_name]) }
+      raise "No team found for: #{result[:visitor][:team_name]}" unless visitor
+      home = game_record.teams.find { |t| t.name == Team.normalize_name(result[:home][:team_name]) }
+      raise "No team found for: #{result[:home][:team_name]}" unless home
 
-    new_result = {
-      game: game_record,
-      visitor: result[:visitor].merge(team: visitor),
-      home: result[:home].merge(team: home),
-    }
-    new_result[:status] = result[:status] unless no_status
+      new_result = {
+        game: game_record,
+        visitor: result[:visitor].merge(team: visitor),
+        home: result[:home].merge(team: home),
+      }
+      new_result[:status] = result[:status] unless no_status
 
-    new_result
+      new_result
+    end
   end
 end

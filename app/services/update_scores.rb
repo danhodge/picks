@@ -66,12 +66,16 @@ class UpdateScores
 
   def update_completed(completed)
     FinalScore.transaction do
-      completed.each do |score|
-        FinalScore.where(game: score[:game], team: score[:visitor][:team]).first_or_create! do |s|
-          s.points = score[:visitor][:score]
-        end
-        FinalScore.where(game: score[:game], team: score[:home][:team]).first_or_create! do |s|
-          s.points = score[:home][:score]
+      completed.each do |result|
+        if result[:status] == "cancelled" || result[:status] == "assumed_cancelled"
+          result[:game].update!(game_status: Game::GAME_STATUS_CANCELLED)
+        else
+          FinalScore.where(game: result[:game], team: result[:visitor][:team]).first_or_create! do |s|
+            s.points = result[:visitor][:score]
+          end
+          FinalScore.where(game: result[:game], team: result[:home][:team]).first_or_create! do |s|
+            s.points = result[:home][:score]
+          end
         end
       end
     end

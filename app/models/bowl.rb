@@ -33,6 +33,9 @@ class Bowl < ActiveRecord::Base
       "First Responder"
     elsif normalized == "Taxslayer" || normalized == "Tax Slayer"
       "TaxSlayer"
+    elsif normalized == "Gator" && season.year == 2021
+      # note: TaxSlayer & Gator Bowl are the same thing
+      "TaxSlayer"
     elsif normalized == "St. Pete"
       "St. Petersburg"
     elsif normalized == "Go Daddy"
