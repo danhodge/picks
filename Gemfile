@@ -18,4 +18,5 @@ gem "unicorn", "~> 6.1.0"
 group :development, :test do
   gem "pry"
   gem "rb-readline"
+  gem "rspec"
 end
