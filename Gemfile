@@ -19,4 +19,6 @@ group :development, :test do
   gem "pry"
   gem "rb-readline"
   gem "rspec"
+  gem "vcr"
+  gem "webmock"
 end

@@ -3,6 +3,7 @@ class Game < ActiveRecord::Base
   GAME_TYPE_SEMIFINAL = 2
   GAME_TYPE_CHAMPIONSHIP = 3
 
+  # new statues: home team forfeit, visiting team forfeit
   GAME_STATUS_NORMAL = 1
   GAME_STATUS_CANCELLED = 2
 
@@ -17,6 +18,8 @@ class Game < ActiveRecord::Base
   validates :game_type, inclusion: { in: [GAME_TYPE_REGULAR, GAME_TYPE_SEMIFINAL, GAME_TYPE_CHAMPIONSHIP] }
   validates :game_status, inclusion: { in: [GAME_STATUS_NORMAL, GAME_STATUS_CANCELLED] }
   validates :bowl_id, uniqueness: { scope: :season_id }
+
+  delegate :name, to: :bowl, allow_nil: false
 
   def self.games_for_season(season)
     where(season: season).includes(:bowl, { visitor: :records }, { home: :records }, { final_scores: [:game, :team] }).order(:game_time, :id)

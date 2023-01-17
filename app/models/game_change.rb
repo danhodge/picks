@@ -1,3 +1,14 @@
+# game changes:
+# 2021 tax slayer -> Rutgers replaced Texas A&M
+# 2021 sun -> C. Mich replaced Miami  (C. Mich was originally scheduled to play in the Arizona Bowl against Boise State )
+
+# game cancelled:
+# 2021 arizona bowl - Boise withdrew, CMU switched to sun bowl
+# 2021 military bowl - BC withdrew
+# 2021 hawaii bowl - Hawaii withdrew
+# 2021 holiday bowl - UCLA withdrew
+# 2021 fenway bowl
+
 class GameChange < ActiveRecord::Base
   belongs_to :game
   belongs_to :new_team, class_name: Team.name, foreign_key: :new_team_id

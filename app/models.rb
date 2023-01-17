@@ -1,3 +1,5 @@
+require 'models/team_status'
+require 'models/game_status'
 require 'models/bowl'
 require 'models/team'
 require 'models/season'
