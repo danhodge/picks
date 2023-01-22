@@ -101,19 +101,32 @@ class CBSScores
     end
     
     if game_status
-      teams = game.teams.filter do |team| 
-        [
-          Team.normalize_name(game_status.visitor_name), 
-          Team.normalize_name(game_status.home_name)
-        ].include?(team.name)
+      normalized_visitor = Team.normalize_name(game_status.visitor_name)
+      normalized_home = Team.normalize_name(game_status.home_name)
+
+      # handles situations where the reported home/visitor assignment doesn't match how it was picked
+      if (normalized_visitor != game.visitor.name && normalized_home == game.visitor.name) || 
+        (normalized_home != game.home.name && normalized_visitor == game.home.name) 
+        game_status.swap_teams!
+        prev_visitor = normalized_visitor
+        normalized_visitor = normalized_home
+        normalized_home = prev_visitor
       end
-      if teams.size != 2
-        game_status.status = "team_mismatch"
-        game_status
-      else
-        game_status
+
+      visitor = game.teams.find { |team| team.name == normalized_visitor }
+      home = game.teams.find { |team| team.name == normalized_home }
+
+      if !visitor
+        game_status.status = "visiting_team_mismatch"
       end
+
+      if !home
+        game_status.status = "home_team_mismatch"
+      end
+
+      game_status
     else
+      game_status = GameStatus.new(game.name, game.visitor.name, game.home.name)
       game_status.status = "missing"
       game_status
     end
