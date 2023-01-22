@@ -11,14 +11,16 @@ class GameStatus
     @home = home
   end
 
-  def team_mismatches?
+  def team_mismatch?
     visiting_team_mismatch? || home_team_mismatch?
   end
 
   def visiting_team_mismatch?
+    @status == "visiting_team_mismatch"
   end
 
   def home_team_mismatch?
+    @status == "home_team_mismatch"
   end
 
   def in_progress?
@@ -31,5 +33,15 @@ class GameStatus
 
   def cancelled?
     return @status == "cancelled"
+  end
+
+  def missing?
+    return @status == "missing"
+  end
+
+  def swap_teams!
+    prev_home = @home
+    @home = @visitor
+    @visitor = prev_home
   end
 end
