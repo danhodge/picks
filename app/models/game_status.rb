@@ -11,6 +11,17 @@ class GameStatus
     @home = home
   end
 
+  def remaining_secs
+    return 0 unless in_progress?
+    
+    if self.remaining
+      mins, secs = self.remaining.split(":").map(&:to_i)
+      secs + mins * 60
+    else
+      0
+    end
+  end
+
   def team_mismatch?
     visiting_team_mismatch? || home_team_mismatch?
   end
@@ -45,3 +56,13 @@ class GameStatus
     @visitor = prev_home
   end
 end
+
+
+# quarter = score[:status][:quarter].gsub(/[^\d]/, "")
+#       remaining_secs =
+#         if (remaining = score[:status][:remaining])
+#           mins, secs = remaining.split(":").map(&:to_i)
+#           secs + mins * 60
+#         else
+#           0
+#         end

@@ -20,9 +20,9 @@ class GameChange < ActiveRecord::Base
   def check_consistency
     if (previous_visiting_team && previous_home_team) || (!previous_visiting_team && !previous_home_team)
       errors[:previous_visiting_team_id] << "one and only one previous team must be set"
-    elsif (previous_visiting_team && new_team != game.visiting_team)
+    elsif (previous_visiting_team && new_team != game.visitor)
       errors[:previous_visiting_team_id] << "the new team is not properly set as the visiting team"
-    elsif (previous_home_team && new_team != game.home_team)
+    elsif (previous_home_team && new_team != game.home)
       errors[:previous_home_team_id] << "the new team is not properly set as the home team"
     end
   end
