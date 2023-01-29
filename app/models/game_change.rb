@@ -15,7 +15,10 @@ class GameChange < ActiveRecord::Base
   belongs_to :previous_visiting_team, class_name: Team.name, foreign_key: :previous_visiting_team_id
   belongs_to :previous_home_team, class_name: Team.name, foreign_key: :previous_home_team_id
 
+  enum status: %i[pending accepted rejected]
+
   validate :check_consistency
+  validates :status, inclusion: { in: statuses.keys }
 
   def check_consistency
     if (previous_visiting_team && previous_home_team) || (!previous_visiting_team && !previous_home_team)

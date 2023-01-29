@@ -86,10 +86,10 @@ class UpdateScores
 
   def update_completed(game, status)
     FinalScore.transaction do
-      if status.cancelled? || status.missing?
-        # TODO: add separate status for missing
-        # on approval, create a score override for the "winning" team and change the game status
-        game.update!(game_status: Game::GAME_STATUS_CANCELLED)
+      if status.cancelled?
+        game.cancelled!
+      elsif status.missing?
+        game.missing!
       else
         FinalScore.where(game: game, team: game.teams.find { |team| team.name == Team.normalize_name(status.visitor_name) }).first_or_create! do |s|
           s.points = status.visitor_score

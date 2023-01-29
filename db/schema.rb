@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_12_14_132126) do
+ActiveRecord::Schema[7.0].define(version: 2023_01_29_021839) do
   create_table "bowls", force: :cascade do |t|
     t.string "name", null: false
     t.string "city"
@@ -38,10 +38,12 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_14_132126) do
     t.integer "previous_home_team_id"
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
+    t.integer "status", default: 0, null: false
     t.index ["game_id"], name: "index_game_changes_on_game_id"
     t.index ["new_team_id"], name: "index_game_changes_on_new_team_id"
     t.index ["previous_home_team_id"], name: "index_game_changes_on_previous_home_team_id"
     t.index ["previous_visiting_team_id"], name: "index_game_changes_on_previous_visiting_team_id"
+    t.index ["status"], name: "index_game_changes_on_status"
   end
 
   create_table "games", force: :cascade do |t|

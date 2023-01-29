@@ -3,10 +3,6 @@ class Game < ActiveRecord::Base
   GAME_TYPE_SEMIFINAL = 2
   GAME_TYPE_CHAMPIONSHIP = 3
 
-  # new statues: home team forfeit, visiting team forfeit
-  GAME_STATUS_NORMAL = 1
-  GAME_STATUS_CANCELLED = 2
-
   belongs_to :season
   belongs_to :bowl
   belongs_to :visitor, class_name: Team.name, foreign_key: :visiting_team_id
@@ -14,9 +10,11 @@ class Game < ActiveRecord::Base
   has_many :final_scores
   has_many :picks
 
+  enum game_status: %i[pending completed cancelled missing visitor_forfeit home_forfeit abandoned]
+
   validates :game_time, presence: true
   validates :game_type, inclusion: { in: [GAME_TYPE_REGULAR, GAME_TYPE_SEMIFINAL, GAME_TYPE_CHAMPIONSHIP] }
-  validates :game_status, inclusion: { in: [GAME_STATUS_NORMAL, GAME_STATUS_CANCELLED] }
+  validates :game_status, inclusion: { in: game_statuses.keys }
   validates :bowl_id, uniqueness: { scope: :season_id }
 
   delegate :name, to: :bowl, allow_nil: false
@@ -30,7 +28,8 @@ class Game < ActiveRecord::Base
   end
 
   def completed?
-    final_scores.count == 2 || game_status == GAME_STATUS_CANCELLED
+    (final_scores.count == 2 && game_status.completed?) || 
+      (game_status.abandoned? || game_status.visitor_forfeit? || game_status.home_forfeit?)
   end
 
   def visitor_final_score
