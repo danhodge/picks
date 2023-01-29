@@ -15,6 +15,10 @@ class Season < ActiveRecord::Base
     Season.where(year: year).first_or_create!
   end
 
+  def completed?
+    games.all?(&:completed?)
+  end
+
   def name
     [year, (year + 1) % 2000].map(&:to_s).join("-")
   end

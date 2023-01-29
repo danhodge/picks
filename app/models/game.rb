@@ -10,7 +10,7 @@ class Game < ActiveRecord::Base
   has_many :final_scores
   has_many :picks
 
-  enum game_status: %i[pending completed cancelled missing visitor_forfeit home_forfeit abandoned]
+  enum game_status: %i[pending finished cancelled missing visitor_forfeit home_forfeit abandoned]
 
   validates :game_time, presence: true
   validates :game_type, inclusion: { in: [GAME_TYPE_REGULAR, GAME_TYPE_SEMIFINAL, GAME_TYPE_CHAMPIONSHIP] }
@@ -28,8 +28,7 @@ class Game < ActiveRecord::Base
   end
 
   def completed?
-    (final_scores.count == 2 && game_status.completed?) || 
-      (game_status.abandoned? || game_status.visitor_forfeit? || game_status.home_forfeit?)
+    (final_scores.count == 2 && finished?) || (abandoned? || visitor_forfeit? || home_forfeit?)
   end
 
   def visitor_final_score

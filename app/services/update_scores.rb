@@ -43,12 +43,12 @@ class UpdateScores
             ).first_or_create!
           end
         end
+      elsif status.missing? && now > (game.game_time + 1.day)
+        update_completed(game, status)
       elsif status.in_progress?
         update_in_progress(game, status)
       elsif status.completed?
-        update_completed(game, status)
-      elsif status.missing? && now > (game.game_time + 1.day)
-        update_completed(game, status)
+        update_completed(game, status)       
       end  
     end
   rescue => ex
@@ -97,6 +97,7 @@ class UpdateScores
         FinalScore.where(game: game, team: game.teams.find { |team| team.name == Team.normalize_name(status.home_name) }).first_or_create! do |s|
           s.points = status.home_score
         end
+        game.finished!
       end     
     end
   rescue StandardError => ex

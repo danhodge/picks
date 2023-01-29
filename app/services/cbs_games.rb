@@ -60,7 +60,7 @@ class CBSGames
     status = game_element.xpath("div/div/div[contains(@class, 'game-status')]")[0].text.strip
     raise "No status found for game: #{game_name}" unless status
 
-    if status.downcase == "final" || status.downcase == "final/ot"
+    if status.downcase == "final" || status.downcase =~ %r{final/(?<num_ots>\d)*ot}
       { quarter: "final" }
     elsif status.downcase == "halftime"
       { quarter: "halftime" }
