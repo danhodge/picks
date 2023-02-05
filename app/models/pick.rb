@@ -11,7 +11,7 @@ class Pick < ActiveRecord::Base
   private
 
   def check_consistency
-    errors[:season_id] << "Participant/Game Season mismatch" unless participant.season == game.season
+    errors.add(:season_id, "Participant/Game Season mismatch") unless participant.season == game.season
 
     if game.game_type == Game::GAME_TYPE_CHAMPIONSHIP
       semi_finalist_ids = Game
@@ -20,10 +20,10 @@ class Pick < ActiveRecord::Base
                             .map(&:id)
 
       unless semi_finalist_ids.include?(team_id)
-        errors[:team_id] << "Invalid team: #{team.try(:id)}, #{game.visiting_team_id}, #{game.home_team_id}"
+        errors.add(:team_id, "Invalid team: #{team.try(:id)}, #{game.visiting_team_id}, #{game.home_team_id}")
       end
     else
-      errors[:team_id] << "Invalid team: #{team.try(:id)}, #{game.visiting_team_id}, #{game.home_team_id}" unless (game.visitor == team || game.home == team)
+      errors.add(:team_id, "Invalid team: #{team.try(:id)}, #{game.visiting_team_id}, #{game.home_team_id}") unless (game.visitor == team || game.home == team)
     end
   end
 end
