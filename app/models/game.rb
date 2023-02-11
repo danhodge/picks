@@ -9,6 +9,7 @@ class Game < ActiveRecord::Base
   belongs_to :home, class_name: Team.name, foreign_key: :home_team_id
   has_many :final_scores
   has_many :picks
+  has_many :accepted_game_changes, -> { accepted }, class_name: 'GameChange'
 
   enum game_status: %i[pending finished cancelled missing visitor_forfeit home_forfeit abandoned]
 
@@ -41,6 +42,10 @@ class Game < ActiveRecord::Base
     final && final.points
   end
 
+  def game_outcome
+    # TODO: return game outcome based on status
+  end
+
   def favored_team
     if point_spread && (point_spread < 0)
       visitor
@@ -56,3 +61,4 @@ class Game < ActiveRecord::Base
     point_spread.abs.round(1)
   end
 end
+

@@ -110,6 +110,7 @@ GEM
       sinatra (>= 1.0)
     sqlite3 (1.5.4)
       mini_portile2 (~> 2.8.0)
+    sums_up (1.2.2)
     tilt (2.0.11)
     tzinfo (2.0.5)
       concurrent-ruby (~> 1.0)
@@ -143,6 +144,7 @@ DEPENDENCIES
   sinatra (~> 2.0)
   sinatra-activerecord (~> 2.0)
   sqlite3
+  sums_up
   unicorn (~> 6.1.0)
   vcr
   webmock

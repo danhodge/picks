@@ -57,7 +57,7 @@ namespace :manual do
     Season.transaction do
       game, team = resolve(args)
 
-      change = GameChange.find_by!(game: game, new_team: team)
+      change = GameChange.pending.find_by!(game: game, new_team: team)
       change.accept_change!
     end
   end
