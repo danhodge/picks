@@ -1,16 +1,9 @@
 require 'sums_up'
 
-# possible outcomes
-#  incompleted (not started, in-progress)
-#  completed with all original teams
-#  completed with one original team  <- 
-#  completed with no original teams  <- no points
-#  forfeited by   <- points awarded to other team
-#  cancelled      <- no points awarded
-
 GameOutcome = SumsUp.define(
   :incomplete, 
   :cancelled,
+  :tied,
   completed: [:game], 
   completed_with_change: [:game], 
   completed_with_changes: [:game], 
@@ -35,6 +28,7 @@ GameOutcome = SumsUp.define(
   def winner
     match do |m|
       m.incomplete nil
+      m.tied nil 
       m.completed(&method(:high_score_team))
       m.completed_with_change(&method(:high_score_team))
       m.completed_with_changes(&method(:high_score_team))
@@ -46,6 +40,7 @@ GameOutcome = SumsUp.define(
   def loser
     match do |m|
       m.incomplete nil
+      m.tied nil 
       m.completed(&method(:low_score_team))
       m.completed_with_change(&method(:low_score_team))
       m.completed_with_changes(&method(:low_score_team))
@@ -57,6 +52,7 @@ GameOutcome = SumsUp.define(
   def points_awarded_to
     match do |m|
       m.incomplete nil
+      m.tied nil 
       m.completed(&method(:high_score_team))
       m.completed_with_change { |game| unchanged_teams(game).first }
       m.completed_with_changes nil

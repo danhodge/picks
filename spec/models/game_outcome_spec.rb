@@ -35,6 +35,25 @@ RSpec.describe GameOutcome do
     end
   end
 
+  context "tied" do
+    let(:outcome) { GameOutcome.tied }
+
+    before do
+      FinalScore.where(game: game, team: home).first_or_create!(points: 4)
+      FinalScore.where(game: game, team: visitor).first_or_create!(points: 4)
+      game.finished!
+    end
+
+    it "declares no winner or loser" do
+      expect(outcome.winner).to be_nil
+      expect(outcome.loser).to be_nil
+    end
+
+    it "awards no points" do
+      expect(outcome.points_awarded_to).to be_nil
+    end
+  end
+
   context "completed" do
     let(:outcome) { GameOutcome.completed(game) }
 

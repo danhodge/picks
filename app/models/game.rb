@@ -43,7 +43,21 @@ class Game < ActiveRecord::Base
   end
 
   def game_outcome
-    # TODO: return game outcome based on status
+    if home_forfeit? || visitor_forfeit?
+      GameOutcome.forfeited(self)
+    elsif completed? && accepted_game_changes.count == 1
+      GameOutcome.completed_with_change(self)
+    elsif completed? && accepted_game_changes.count == 2
+      GameOutcome.completed_with_changes(self)
+    elsif abandoned?
+      GameOutcome.cancelled
+    elsif completed? && visitor_final_score == home_final_score
+      GameOutcome.tied
+    elsif completed?
+      GameOutcome.completed(self)
+    else
+      GameOutcome.incomplete
+    end
   end
 
   def favored_team
