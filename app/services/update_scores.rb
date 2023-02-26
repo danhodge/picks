@@ -86,11 +86,11 @@ class UpdateScores
 
   def update_completed(game, status)
     FinalScore.transaction do
-      if status.cancelled?
+      if status.cancelled? && !game.completed?
         game.cancelled!
-      elsif status.missing?
+      elsif status.missing? && !game.completed?
         game.missing!
-      else
+      elsif !status.cancelled? && !status.missing?
         FinalScore.where(game: game, team: game.teams.find { |team| team.name == Team.normalize_name(status.visitor_name) }).first_or_create! do |s|
           s.points = status.visitor_score
         end

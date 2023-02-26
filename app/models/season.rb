@@ -5,6 +5,11 @@ class Season < ActiveRecord::Base
   validates :year, presence: true
 
   def self.current
+    env_year = ENV['SEASON']
+    if env_year && env_year.strip.length > 0
+      return Season.find_by!(year: env_year)
+    end
+
     now = Time.now
     year = if now.month == 12
              now.year

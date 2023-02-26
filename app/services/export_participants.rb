@@ -11,25 +11,48 @@ class ExportParticipants
     @client = client
   end
 
-  def perform
-    participants = Participant.participants_for_season(season).map do |participant|
-      {
+  def build_participants
+    Participant.participants_for_season(season).each_with_object({}) do |participant, participants|
+      participants[participant.id] = {
         name: participant.nickname,
-        tie_breaker: participant.tiebreaker,
-        picks: participant.picks.sort_by { |pick| [pick.game.game_time, pick.game.id] }.map do |pick|
-          {
-            game_name: pick.game.bowl.name,
-            team_name: pick.team.name,
+        tiebreaker: participant.tiebreaker,
+        picks: participant.picks.each_with_object({}) do |pick, picks|
+          picks[pick.game.id] = {
+            team_id: pick.team.id,
             points: pick.points
           }
         end
       }
     end
+  end
+
+  def build_games
+    Game.games_for_season(season).each_with_object({}) do |game, games|
+      games[game.id] = {
+        name: game.bowl.name,
+        time: game.game_time.iso8601,
+        location: [game.bowl.city, game.bowl.state].compact.join(", "),
+        visiting_team_id: game.visiting_team_id,
+        home_team_id: game.home_team_id
+      }
+    end
+  end
+
+  def build_teams
+    Team.all.map { |team| [team.id, team.name] }.to_h
+  end
+
+  def perform
+    participants = {
+      participants: build_participants,
+      games: build_games,
+      teams: build_teams
+    }
 
     client.put_object(
       acl: "public-read",
       bucket: "danhodge-cfb",
-      key: "#{season.year}/participants_#{season.year}.json",
+      key: "#{ENV['RACK_ENV']}/#{season.year}/participants.json",
       body: participants.to_json
     )
   end

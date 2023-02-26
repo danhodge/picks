@@ -90,13 +90,14 @@ class UpdateResults
   end
 
   def perform
+    key = "#{ENV['RACK_ENV']}/#{season.year}/results.json"
     resp = client.put_object(
       acl: "public-read",
       bucket: "danhodge-cfb",
-      key: "#{season.year}/results_#{season.year}.json",
+      key: key,
       body: build_results.to_json
     )
-    puts "Updated s3://danhodge-cfb/#{season.year}/results_#{season.year}.json - #{resp}"
+    puts "Updated s3://danhodge-cfb/#{key} - #{resp}"
   end
 
   private
