@@ -15,11 +15,11 @@ class UpdateScores
   end
 
   def perform
-    update
-    Updatestatuss.perform(@season)
+    update_games
+    UpdateResults.perform(@season)
   end
 
-  def update(now: Time.now)
+  def update_games(now: Time.now)
     cbs_scores.scrape
     games.each do |game|
       next if game.game_time > (now + 300)
@@ -99,6 +99,10 @@ class UpdateScores
         end
         game.finished!
       end     
+
+      outcome = game.game_outcome
+      game.picks.where(team: outcome.points_awarded_to).update_all(status: :correct)
+      game.picks.where.not(team: outcome.points_awarded_to).update_all(status: :incorrect)
     end
   rescue StandardError => ex
     puts "Error updating completed scores: #{ex.message} - #{ex.backtrace.join("\n")}"

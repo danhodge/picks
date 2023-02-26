@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_01_29_023829) do
+ActiveRecord::Schema[7.0].define(version: 2023_02_26_145210) do
   create_table "bowls", force: :cascade do |t|
     t.string "name", null: false
     t.string "city"
@@ -83,9 +83,11 @@ ActiveRecord::Schema[7.0].define(version: 2023_01_29_023829) do
     t.integer "points", null: false
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
+    t.integer "status", default: 0, null: false
     t.index ["game_id"], name: "index_picks_on_game_id"
     t.index ["participant_id", "game_id"], name: "index_picks_on_participant_id_and_game_id", unique: true
     t.index ["participant_id"], name: "index_picks_on_participant_id"
+    t.index ["status"], name: "index_picks_on_status"
     t.index ["team_id"], name: "index_picks_on_team_id"
   end
 

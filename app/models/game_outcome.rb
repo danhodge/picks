@@ -25,6 +25,26 @@ GameOutcome = SumsUp.define(
     end
   end
 
+  def completed?
+    match do |m|
+      m.incomplete false
+      m.cancelled false
+      m.tied true
+      m.completed true
+      m.completed_with_change true
+      m.completed_with_changes true
+      m.forfeited false
+    end
+  end
+
+  def forfeited?
+    match(forfeited: true, _: false)
+  end
+
+  def cancelled?
+    match(cancelled: true, _: false)
+  end
+
   def winner
     match do |m|
       m.incomplete nil

@@ -4,9 +4,13 @@ class Pick < ActiveRecord::Base
   belongs_to :team
   has_one :season, through: :game
 
+  enum status: %i[pending correct incorrect]
+
   validates :points, presence: true
   validates :game_id, uniqueness: { scope: [:participant_id] }
   validate :check_consistency
+
+  scope :completed, -> { where.not(status: :pending) }
 
   private
 
