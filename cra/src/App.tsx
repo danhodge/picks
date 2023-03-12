@@ -21,17 +21,25 @@ const loadTeamWithScore = (data: any) => {
 };*/
 
 export interface Game {
+  id: number;
   name: string;
   location: string;
   time: string;
   visitor: Team;
   home: Team;
-  scores: Array<FinalScore>;
-  totalPoints: number;
-  totalPointsWon?: number;
+  //scores: Array<FinalScore>;
+  //totalPoints: number;
+  //totalPointsWon?: number;
+};
+
+export interface GameOutcome {
+  status: string;
+  pointsAwardedTo: Team;
+  finalScores: Map<number, number>;
 };
 
 export interface Team {
+  id: number;
   name: string;
 };
 
@@ -50,113 +58,204 @@ export interface Pick {
 export interface Participant {
   name: string;
   tieBreaker: number;
-  picks: Array<Pick>;
+  picks: Map<number, Pick>;
+}
+
+export interface Score {
+  pointsWon: number;
+  pointsLost: number;
+  pointsRemaining: number;
+  scoringAvg: number;
+  wins: number;
+  losses: number;
 }
 
 export interface Data {
-  games: Array<Game>;
-  participants: Array<Participant>;
+  games: Map<number, Game>;
+  participants: Map<number, Participant>;
+  results: Map<number, GameOutcome>;
 }
 
 const unknownGame = () => {
   return {} as Game;
 }
 
-const loadGame = (data: any) => {
+const loadGame = (data: any, id: number, teams: Map<number, Team>) => {
+  const visitor = teams.get(data.visiting_team_id);
+  const home = teams.get(data.home_team_id);
+  if (!visitor || !home) {
+    return undefined;
+  }
+
   const game: Game = {
+    id: id,
     name: data.name,
     location: data.location,
     time: data.time,
-    totalPoints: 0,
-    scores: [],
-    visitor: loadTeam(data.visitor),
-    home: loadTeam(data.home)
+    visitor: visitor,
+    home: home
   };
-  loadScores(game, game.visitor, data.visitor);
-  loadScores(game, game.home, data.home);
+  // loadScores(game, game.visitor, data.visitor);
+  // loadScores(game, game.home, data.home);
 
   return game;
 };
 
-const loadTeam = (data: any) => {
-  const team: Team = { name: data.name };
-  return team;
-};
+// const loadTeam = (data: any) => {
+//   const team: Team = { name: data.name };
+//   return team;
+// };
 
-const loadScores = (game: Game, team: Team, data: any) => {
-  if (data.score !== "") {
-    const score: FinalScore = {
-      game: game,
-      team: team,
-      score: parseInt(data.score)
-    };
-    game.scores.push(score);
+// const loadScores = (game: Game, team: Team, data: any) => {
+//   if (data.score !== "") {
+//     const score: FinalScore = {
+//       game: game,
+//       team: team,
+//       score: parseInt(data.score)
+//     };
+//     //game.scores.push(score);
+//   }
+// }
+
+const loadTeams = (data: any) => {
+  const teams = new Map<number, Team>();
+  for (const idStr in data) {
+    const id = parseInt(idStr);
+    teams.set(id, { id: id, name: data[id] });
+  }
+  return teams;
+}
+
+const loadGames = (data: any, teams: Map<number, Team>) => {
+  const games = new Map<number, Game>();
+  for (const idStr in data) {
+    const id = parseInt(idStr);
+    const game = loadGame(data[id], id, teams);
+    if (game) {
+      games.set(id, game);
+    }
+  }
+
+  return games;
+}
+
+const loadResults = (data: any, teams: Map<number, Team>, games: Map<number, Game>) => {
+  const results = new Map<number, GameOutcome>();
+  for (const idStr in data) {
+    const id = parseInt(idStr);
+    const game = games.get(id);
+    const winner = teams.get(data[id].points_awarded_to);
+    const scores = new Map<number, number>();
+    for (const teamIdStr in data[id].final_scores) {
+      const team = teams.get(parseInt(teamIdStr));
+      if (team) {
+        scores.set(team.id, parseInt(data[id].final_scores[teamIdStr]));
+      }
+    }
+
+    if (game && winner && scores.size === 2) {
+      const outcome: GameOutcome = {
+        status: data[id].status,
+        pointsAwardedTo: winner,
+        finalScores: scores
+      };
+      results.set(id, outcome);
+    }
+  }
+
+  return results;
+}
+
+const loadParticipants = (data: any, games: Map<number, Game>) => {
+  const participants = new Map<number, Participant>();
+  for (const idStr in data) {
+    const id = parseInt(idStr);
+    participants.set(id, loadParticipant(data[id], games));
+  }
+
+  return participants;
+}
+
+const loadPick = (data: any, game: Game | undefined) => {
+  if (!game) {
+    return undefined;
+  }
+
+  const team = [game.home, game.visitor].find((team: Team) => team.id === data.team_id);
+  if (team) {
+    return { game: game, team: team, points: data.points };
+  } else {
+    return undefined;
   }
 }
 
-const loadPick = (data: any, games: Map<string, Game>) => {
-  const game = games.get(data.game_name) || unknownGame();
-  const pick: Pick = {
-    game: game,
-    team: data.team_name === game.home.name ? game.home : game.visitor,
-    points: parseInt(data.points)
-  }
-
-  return pick;
-}
-
-const loadParticipant = (data: any, games: Map<string, Game>) => {
+const loadParticipant = (data: any, games: Map<number, Game>) => {
+  const picks = new Map<number, Pick>();
   const participant: Participant = {
     name: data.name,
-    tieBreaker: parseInt(data.tie_breaker),
-    picks: data.picks.map((pick: any) => loadPick(pick, games))
+    tieBreaker: data.tiebreaker,
+    picks: picks
   };
+  for (const gameIdStr in data.picks) {
+    const gameId = parseInt(gameIdStr);
+    const game = games.get(gameId);
+    const pick = loadPick(data.picks[gameId], game);
+    if (game && pick) {
+      picks.set(gameId, pick);
+    }
+  }
 
   return participant;
 };
 
-const reconcile = (games: Array<Game>, participants: Array<Participant>) => {
-  games.forEach(game => {
-    const allPicks = participants.flatMap(p => p.picks);
-    const gamePicks = allPicks.filter(pick => pick.game === game);
-    game.totalPoints = gamePicks.reduce((acc, cur) => acc + cur.points, 0);
-    if (isCompleted(game)) {
-      const winning = winner(game);
-      console.log(`Reconciling for winning team ${winning && winning.name}`);
-      game.totalPointsWon = gamePicks.reduce((acc, cur) => acc + (cur.team === winning ? cur.points : 0), 0);
-    }
-  });
-}
-
-export const isCompleted = (game: Game) => {
-  return scoreForTeam(game, game.visitor) && scoreForTeam(game, game.home);
+const loadScores = (data: any, participants: Map<number, Participant>) => {
+  // load Score objects, attach to Participant
+  return 1;
 };
 
-export const scoreForTeam = (game: Game, targetTeam: Team) => {
-  const scores = game.scores.filter(score => score.team === targetTeam);
-  if (scores.length === 0) {
+// const reconcile = (games: Array<Game>, participants: Array<Participant>) => {
+//   games.forEach(game => {
+//     const allPicks = participants.flatMap(p => p.picks);
+//     const gamePicks = allPicks.filter(pick => pick.game === game);
+//     game.totalPoints = gamePicks.reduce((acc, cur) => acc + cur.points, 0);
+//     if (isCompleted(game)) {
+//       const winning = winner(game);
+//       console.log(`Reconciling for winning team ${winning && winning.name}`);
+//       game.totalPointsWon = gamePicks.reduce((acc, cur) => acc + (cur.team === winning ? cur.points : 0), 0);
+//     }
+//   });
+// }
+
+export const isCompleted = (outcome: GameOutcome | undefined) => {
+  if (!outcome) {
     return undefined;
-  } else {
-    return scores[0].score;
   }
+  return outcome.status === "completed";
+};
+
+export const scoreForTeam = (outcome: GameOutcome | undefined, targetTeam: Team) => {
+  if (!outcome) {
+    return undefined;
+  }
+  return outcome.finalScores.get(targetTeam.id);
 };
 
 // TODO: turn into a game result (win, loss, tie, etc)?
-export const winner = (game: Game) => {
-  if (!isCompleted(game)) {
-    return undefined;
-  }
-  const visitorScore = scoreForTeam(game, game.visitor);
-  const homeScore = scoreForTeam(game, game.home);
+// export const winner = (game: Game) => {
+//   if (!isCompleted(game)) {
+//     return undefined;
+//   }
+//   const visitorScore = scoreForTeam(game, game.visitor);
+//   const homeScore = scoreForTeam(game, game.home);
 
-  if (visitorScore && homeScore && visitorScore > homeScore) {
-    return game.visitor;
-  } else if (visitorScore && homeScore && homeScore > visitorScore) {
-    return game.home;
-  } else {
-    return undefined;
-  }
-};
+//   if (visitorScore && homeScore && visitorScore > homeScore) {
+//     return game.visitor;
+//   } else if (visitorScore && homeScore && homeScore > visitorScore) {
+//     return game.home;
+//   } else {
+//     return undefined;
+//   }
+// };
 
 
 /*export interface GameData {
@@ -261,42 +360,51 @@ export interface GameStats {
 //   }
 // };
 
-export const averagePickForGame = (data: Data, game: Game) => {
-  const allPicks = data.participants.flatMap(p => p.picks).filter(p => p.game === game);
-  const sum = allPicks.reduce((acc, cur) => acc + (cur.team === game.visitor ? -cur.points : cur.points), 0);
-  const avg = sum / allPicks.length;
-  if (avg < 0) {
-    return { team: game.visitor.name, points: -avg.toFixed(2) };
-  } else {
-    return { team: game.home.name, points: avg.toFixed(2) };
-  }
-};
+// export const averagePickForGame = (data: Data, game: Game) => {
+//   const allPicks = data.participants.flatMap(p => p.picks).filter(p => p.game === game);
+//   const sum = allPicks.reduce((acc, cur) => acc + (cur.team === game.visitor ? -cur.points : cur.points), 0);
+//   const avg = sum / allPicks.length;
+//   if (avg < 0) {
+//     return { team: game.visitor.name, points: -avg.toFixed(2) };
+//   } else {
+//     return { team: game.home.name, points: avg.toFixed(2) };
+//   }
+// };
 
-export const medianPickForGame = (data: Data, game: Game) => {
-  const allPicks = data.participants.flatMap(p => p.picks).filter(p => p.game === game);
-  const sortedPoints = allPicks.map(pick => pick.team === game.visitor ? -pick.points : pick.points).sort((x, y) => x - y);
-  const medianPoints = sortedPoints[Math.floor(sortedPoints.length / 2)];
-  if (medianPoints < 0) {
-    return { team: game.visitor.name, points: -medianPoints };
-  } else {
-    return { team: game.home.name, points: medianPoints };
-  }
-};
+// export const medianPickForGame = (data: Data, game: Game) => {
+//   const allPicks = data.participants.flatMap(p => p.picks).filter(p => p.game === game);
+//   const sortedPoints = allPicks.map(pick => pick.team === game.visitor ? -pick.points : pick.points).sort((x, y) => x - y);
+//   const medianPoints = sortedPoints[Math.floor(sortedPoints.length / 2)];
+//   if (medianPoints < 0) {
+//     return { team: game.visitor.name, points: -medianPoints };
+//   } else {
+//     return { team: game.home.name, points: medianPoints };
+//   }
+// };
 
 const queryClient = new QueryClient();
 
 const fetchResults = async () => {
   const res1 = Promise.all([
-    fetch("http://localhost:5000/results.json"),
-    fetch("http://localhost:5000/participants.json")
+    fetch("https://danhodge-cfb.s3.amazonaws.com/development/2021/results.json"),
+    fetch("https://danhodge-cfb.s3.amazonaws.com/development/2021/participants.json")
   ]).then(([r1, r2]) => [r1.json(), r2.json()])
     .then(async ([a, b]) => {
-      const games: Array<Game> = (await a).map(loadGame);
-      const gamesMap = new Map<string, Game>();
-      games.forEach(game => gamesMap.set(game.name, game));
-      const participants: Array<Participant> = (await b).map((participant: any) => loadParticipant(participant, gamesMap));
-      reconcile(games, participants);
-      const data: Data = { games: games, participants: participants };
+      //const games: Array<Game> = (await a).map(loadGame);
+      //const gamesMap = new Map<string, Game>();
+      //games.forEach(game => gamesMap.set(game.name, game));
+      const bData = await b;
+      const teams: Map<number, Team> = loadTeams(bData["teams"]);
+      const games: Map<number, Game> = loadGames(bData["games"], teams);
+
+      const aData = await a;
+      const results: Map<number, GameOutcome> = loadResults(aData["results"], teams, games);
+
+      const participants: Map<number, Participant> = loadParticipants(bData["participants"], games);
+      //const changes: Map<number, GameChange> = loadChanges(aData["changes"], teams, games);
+      const scores = loadScores(aData["scoring"], participants);
+
+      const data: Data = { games: games, results: results, participants: participants };
 
       return data;
     });
@@ -326,7 +434,10 @@ function Shell() {
   //   });
   // });
 
-  const game = data && data.games[2];
+  // TODO: game data not being loaded correctlty
+  const firstGameId = data && data.games.keys().next().value;
+  const game = data && data.games.get(firstGameId);
+  console.log(`first id = ${firstGameId}, game = ${game}`);
 
   return isLoading ?
     <div className="App">Loading...</div> :

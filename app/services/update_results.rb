@@ -20,7 +20,7 @@ class UpdateResults
   end
 
   def build_game_results
-    Game.games_for_season(season).select(&:completed?).map do |game|
+    Game.games_for_season(season).select(&:completed?).each_with_object({}) do |game, games|
       outcome = game.game_outcome
       status = 
         if outcome.cancelled?
@@ -31,20 +31,20 @@ class UpdateResults
           "completed"
         end
       
-      results = { status: status }
+      result = { status: status }
       if outcome.forfeited?
-        results[:forfeited_by] = (game.home_forfeit? ? game.home : game.visitor).id
+        result[:forfeited_by] = (game.home_forfeit? ? game.home : game.visitor).id
       end
 
       if awarded = outcome.points_awarded_to
-        results[:points_awarded_to] = awarded.id
+        result[:points_awarded_to] = awarded.id
       end
 
       if outcome.completed?
-        results[:final_scores] = game.final_scores.map { |score| [score.team_id, score.points] }.to_h
+        result[:final_scores] = game.final_scores.map { |score| [score.team_id, score.points] }.to_h
       end
 
-      results
+      games[game.id] = result
     end
   end
 
