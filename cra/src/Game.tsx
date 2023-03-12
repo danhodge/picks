@@ -50,12 +50,30 @@ export interface PickGroupProps {
 }
 
 const PickGroup = (props: PickGroupProps) => {
+  const sorter = (a: [string, number], b: [string, number]) => {
+    const [aName, aPoints] = a;
+    const [bName, bPoints] = b;
+    const diff = bPoints - aPoints; // sort by points descending
+    if (diff === 0) {
+      return aName < bName ? -1 : 1; // sort by names ascending
+    } else {
+      return diff;
+    }
+  };
+  const rows = Array.from(props.stats.picks.entries()).sort(sorter).map((val: [string, number]) => {
+    const [name, points] = val;
+    return <div key={name}><span>{name}: {points}</span></div>
+  });
+
   return <div>
     <div>
       <div>
         <>
           {props.team.name} {props.stats.totalPicks()} picks, {props.stats.totalPoints()} points
         </>
+      </div>
+      <div>
+        {rows}
       </div>
     </div>
   </div>;
