@@ -38,12 +38,6 @@ class PickStats {
   }
 }
 
-const Result = (props: ResultProps) => {
-  return isCompleted(props.outcome) ?
-    <div>Winner: {props.outcome?.pointsAwardedTo.name}</div > : <div>Incomplete</div>;
-};
-
-
 export interface PickGroupProps {
   team: Team;
   stats: PickStats;
@@ -65,18 +59,18 @@ const PickGroup = (props: PickGroupProps) => {
     return <div key={name}><span>{name}: {points}</span></div>
   });
 
-  return <div>
+  return <div className="pt-6">
     <div>
       <div>
         <>
           {props.team.name} {props.stats.totalPicks()} picks, {props.stats.totalPoints()} points
         </>
       </div>
-      <div>
+      <div className="grid grid-cols-6 gap-2 p-3">
         {rows}
-      </div>
-    </div>
-  </div>;
+      </div >
+    </div >
+  </div >;
 };
 
 const Picks = (props: PicksProps) => {
@@ -121,25 +115,37 @@ const GameComponent = (props: GameProps) => {
   // });
   //const pointsWonIndex = gamesByPointsWon.indexOf(props.game);
 
-  return <div>
-    <div>
-      {props.game.name}
+  return <div className="bg-slate-300 container mx-auto">
+    <div className="pb-5">
+      <p className="font-semibold text-lg">{props.game.name}</p>
     </div>
-    <div>
-      {props.game.visitor.name} - {scoreForTeam(outcome, props.game.visitor) || "unknown"}
+    <div className="w-80 rounded-lg border-2 border-slate-800 grid grid-cols-5 gap-2 p-3">
+      <TeamScore team={props.game.visitor} outcome={outcome} />
+      <TeamScore team={props.game.home} outcome={outcome} />
     </div>
-    at
-    <div>
-      {props.game.home.name} - {scoreForTeam(outcome, props.game.home) || "unknown"
-      }
-    </div >
-    {/* <div>Median Pick</div><div>{medianPick.team} - {medianPick.points}</div> */}
-    <Result game={props.game} outcome={outcome} />
     <Picks game={props.game} picksFor={picksFor} />
     {/* <div>Total Points Wagered - {props.game.totalPoints} (#{wageredIndex + 1})</div>
     {isCompleted(props.game) ? <div>Total Points Won - {props.game.totalPointsWon} (#{pointsWonIndex + 1})</div> : <div></div>}
     {isCompleted(props.game) ? <div>Winning Pct - {winningPct}%</div> : <div></div>} */}
-  </div>;
+  </div >;
 };
+
+
+export interface TeamScoreProps {
+  team: Team;
+  outcome: GameOutcome | undefined;
+}
+
+const TeamScore = (props: TeamScoreProps) => {
+  return (props.outcome?.pointsAwardedTo === props.team) ?
+    <>
+      <div className="col-span-4 font-semibold">{props.team.name}</div>
+      <div className="font-semibold">{scoreForTeam(props.outcome, props.team) || " unknown"}</div>
+    </> :
+    <>
+      <div className="col-span-4">{props.team.name}</div>
+      <div>{scoreForTeam(props.outcome, props.team) || " unknown"}</div>
+    </>;
+}
 
 export default GameComponent;
