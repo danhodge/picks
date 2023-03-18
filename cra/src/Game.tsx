@@ -41,6 +41,7 @@ class PickStats {
 export interface PickGroupProps {
   team: Team;
   stats: PickStats;
+  game: Game;
 }
 
 const PickGroup = (props: PickGroupProps) => {
@@ -54,23 +55,29 @@ const PickGroup = (props: PickGroupProps) => {
       return diff;
     }
   };
+  const bgColors = ["bg-orange-300", "bg-blue-300"];
+  const bgColor = (props.team === props.game.visitor) ? bgColors[0] : bgColors[1];
+
   const rows = Array.from(props.stats.picks.entries()).sort(sorter).map((val: [string, number]) => {
     const [name, points] = val;
-    return <div key={name}><span>{name}: {points}</span></div>
+    return <>
+      <div key={name + "_name"}>{name}</div>
+      <div key={name + "_points"}>{points}</div>
+    </>
   });
 
   return <div className="pt-6">
     <div>
-      <div>
+      <div className="text-lg">
         <>
           {props.team.name} {props.stats.totalPicks()} picks, {props.stats.totalPoints()} points
         </>
       </div>
-      <div className="grid grid-cols-6 gap-2 p-3">
+      <div className={bgColor + " rounded-lg grid grid-cols-8 gap-2 p-3"}>
         {rows}
-      </div >
-    </div >
-  </div >;
+      </div>
+    </div>
+  </div>;
 };
 
 const Picks = (props: PicksProps) => {
@@ -78,7 +85,7 @@ const Picks = (props: PicksProps) => {
     const [id, stats] = val;
     const team = props.game.home.id === id ? props.game.home : props.game.visitor;
     const groupId = `${props.game.id}_${team.id}`;
-    return <PickGroup key={groupId} team={team} stats={stats} />;
+    return <PickGroup key={groupId} team={team} game={props.game} stats={stats} />;
   });
 
   return <div>{sections}</div>;
@@ -86,9 +93,11 @@ const Picks = (props: PicksProps) => {
 
 const GameComponent = (props: GameProps) => {
   const outcome = props.data.results.get(props.game.id);
-  //props.data.participants.get(1)?.picks
 
+  // populate the picksFor map to ensure that the visiting team is always first
   const picksFor = new Map<number, PickStats>();
+  picksFor.set(props.game.visitor.id, new PickStats());
+  picksFor.set(props.game.home.id, new PickStats());
 
   props.data.participants.forEach((participant: Participant) => {
     const pick = participant.picks.get(props.game.id);
@@ -115,11 +124,11 @@ const GameComponent = (props: GameProps) => {
   // });
   //const pointsWonIndex = gamesByPointsWon.indexOf(props.game);
 
-  return <div className="bg-slate-300 container mx-auto">
+  return <div className="bg-yellow-100 container mx-auto">
     <div className="pb-5">
-      <p className="font-semibold text-lg">{props.game.name}</p>
+      <p className="font-semibold text-xl">{props.game.name}</p>
     </div>
-    <div className="w-80 rounded-lg border-2 border-slate-800 grid grid-cols-5 gap-2 p-3">
+    <div className="w-80 rounded-lg border-2 border-slate-800 grid grid-cols-5 gap-2 p-3 mb-8">
       <TeamScore team={props.game.visitor} outcome={outcome} />
       <TeamScore team={props.game.home} outcome={outcome} />
     </div>
