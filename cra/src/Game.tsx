@@ -33,7 +33,8 @@ class PickStats {
     return total;
   }
 
-  update(name: string, points: number): void {
+  // TODO: store total points so it can be displayed and used for sorting
+  update(name: string, points: number, totalPoints: number): void {
     this.picks.set(name, points);
   }
 }
@@ -62,7 +63,7 @@ const PickGroup = (props: PickGroupProps) => {
     const [name, points] = val;
     return <>
       <div key={name + "_name"}>{name}</div>
-      <div key={name + "_points"}>{points}</div>
+      <div className="font-thin" key={name + "_points"}>{points}</div>
     </>
   });
 
@@ -70,7 +71,7 @@ const PickGroup = (props: PickGroupProps) => {
     <div>
       <div className="text-lg">
         <>
-          {props.team.name} {props.stats.totalPicks()} picks, {props.stats.totalPoints()} points
+          {props.team.name} <span className="font-extralight">{props.stats.totalPicks()} picks {props.stats.totalPoints()} points</span>
         </>
       </div>
       <div className={bgColor + " rounded-lg grid grid-cols-8 gap-2 p-3"}>
@@ -88,7 +89,16 @@ const Picks = (props: PicksProps) => {
     return <PickGroup key={groupId} team={team} game={props.game} stats={stats} />;
   });
 
-  return <div>{sections}</div>;
+  return <div>
+    <div>
+      Sort by <select>
+        <option>Place Change</option>
+        <option>Current Place</option>
+        <option>Final Place</option>
+      </select>
+    </div>
+    <div>{sections}</div>
+  </div>;
 }
 
 const GameComponent = (props: GameProps) => {
@@ -107,7 +117,7 @@ const GameComponent = (props: GameProps) => {
         stats = new PickStats();
         picksFor.set(pick.team.id, stats);
       }
-      stats.update(participant.name, pick.points);
+      stats.update(participant.name, pick.points, pick.totalPoints);
     }
   });
 
@@ -127,10 +137,14 @@ const GameComponent = (props: GameProps) => {
   return <div className="bg-yellow-100 container mx-auto">
     <div className="pb-5">
       <p className="font-semibold text-xl">{props.game.name}</p>
+      <p className="font-thin text-sm">{props.game.location}</p>
     </div>
-    <div className="w-80 rounded-lg border-2 border-slate-800 grid grid-cols-5 gap-2 p-3 mb-8">
-      <TeamScore team={props.game.visitor} outcome={outcome} />
-      <TeamScore team={props.game.home} outcome={outcome} />
+    <div className="w-80">
+      <div className="bg-gray-50 rounded-lg border-2 border-slate-600 grid grid-cols-5 gap-2 p-3">
+        <TeamScore team={props.game.visitor} outcome={outcome} />
+        <TeamScore team={props.game.home} outcome={outcome} />
+      </div>
+      <div className="mb-8 text-right font-semibold text-md italic pr-3">final</div>
     </div>
     <Picks game={props.game} picksFor={picksFor} />
     {/* <div>Total Points Wagered - {props.game.totalPoints} (#{wageredIndex + 1})</div>

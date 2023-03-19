@@ -53,6 +53,7 @@ export interface Pick {
   game: Game;
   team: Team;
   points: number;
+  totalPoints: number; // the total number of points this participant has earned (including this pick)
 };
 
 export interface Participant {
@@ -166,41 +167,48 @@ const loadResults = (data: any, teams: Map<number, Team>, games: Map<number, Gam
   return results;
 }
 
-const loadParticipants = (data: any, games: Map<number, Game>) => {
+const loadParticipants = (data: any, games: Map<number, Game>, results: Map<number, GameOutcome>) => {
   const participants = new Map<number, Participant>();
   for (const idStr in data) {
     const id = parseInt(idStr);
-    participants.set(id, loadParticipant(data[id], games));
+    participants.set(id, loadParticipant(data[id], games, results));
   }
 
   return participants;
 }
 
-const loadPick = (data: any, game: Game | undefined) => {
+const loadPick = (data: any, game: Game | undefined, totalPoints: number) => {
   if (!game) {
     return undefined;
   }
 
   const team = [game.home, game.visitor].find((team: Team) => team.id === data.team_id);
   if (team) {
-    return { game: game, team: team, points: data.points };
+    return { game: game, team: team, points: data.points, totalPoints: totalPoints };
   } else {
     return undefined;
   }
 }
 
-const loadParticipant = (data: any, games: Map<number, Game>) => {
+const loadParticipant = (data: any, games: Map<number, Game>, results: Map<number, GameOutcome>) => {
   const picks = new Map<number, Pick>();
   const participant: Participant = {
     name: data.name,
     tieBreaker: data.tiebreaker,
     picks: picks
   };
+  var pointTotal = 0;
   for (const gameIdStr in data.picks) {
     const gameId = parseInt(gameIdStr);
     const game = games.get(gameId);
-    const pick = loadPick(data.picks[gameId], game);
+    const pick = loadPick(data.picks[gameId], game, pointTotal);
+
     if (game && pick) {
+      const outcome = results.get(game.id);
+      if (outcome && outcome.status === "completed" && outcome.pointsAwardedTo === pick.team) {
+        pointTotal += pick.points;
+        pick.totalPoints = pointTotal;
+      }
       picks.set(gameId, pick);
     }
   }
@@ -400,7 +408,7 @@ const fetchResults = async () => {
       const aData = await a;
       const results: Map<number, GameOutcome> = loadResults(aData["results"], teams, games);
 
-      const participants: Map<number, Participant> = loadParticipants(bData["participants"], games);
+      const participants: Map<number, Participant> = loadParticipants(bData["participants"], games, results);
       //const changes: Map<number, GameChange> = loadChanges(aData["changes"], teams, games);
       const scores = loadScores(aData["scoring"], participants);
 
@@ -435,7 +443,9 @@ function Shell() {
   // });
 
   // TODO: game data not being loaded correctlty
-  const firstGameId = data && data.games.keys().next().value;
+  const iter = data && data.games.keys()
+  iter?.next();
+  const firstGameId = iter?.next().value;
   const game = data && data.games.get(firstGameId);
   console.log(`first id = ${firstGameId}, game = ${game}`);
 
