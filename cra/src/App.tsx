@@ -5,6 +5,7 @@ import internal from 'stream';
 import { TemplateExpression, textChangeRangeIsUnchanged } from 'typescript';
 import './App.css';
 import GameComponent from './Game';
+import { Scoreboard } from './Scoreboard';
 
 /*export interface TeamWithScore {
   name: string;
@@ -60,6 +61,7 @@ export interface Participant {
   name: string;
   tieBreaker: number;
   picks: Map<number, Pick>;
+  score: Score;
 }
 
 export interface Score {
@@ -195,7 +197,15 @@ const loadParticipant = (data: any, games: Map<number, Game>, results: Map<numbe
   const participant: Participant = {
     name: data.name,
     tieBreaker: data.tiebreaker,
-    picks: picks
+    picks: picks,
+    score: {
+      pointsWon: 0,
+      pointsLost: 0,
+      pointsRemaining: 0,
+      scoringAvg: 0,
+      wins: 0,
+      losses: 0
+    }
   };
   var pointTotal = 0;
   for (const gameIdStr in data.picks) {
@@ -217,8 +227,24 @@ const loadParticipant = (data: any, games: Map<number, Game>, results: Map<numbe
 };
 
 const loadScores = (data: any, participants: Map<number, Participant>) => {
-  // load Score objects, attach to Participant
-  return 1;
+  for (const participantIdStr in data) {
+    const participantId = parseInt(participantIdStr);
+    const participant = participants.get(participantId);
+    const scoringData = data[participantId];
+
+    if (participant && scoringData) {
+      participant.score = {
+        pointsWon: scoringData['points'].won,
+        pointsLost: scoringData['points'].lost,
+        pointsRemaining: scoringData['points'].remaining,
+        scoringAvg: scoringData['points'].average,
+        wins: scoringData['games'].won,
+        losses: scoringData['games'].lost,
+      }
+    }
+  }
+
+  return participants;
 };
 
 // const reconcile = (games: Array<Game>, participants: Array<Participant>) => {
@@ -410,7 +436,7 @@ const fetchResults = async () => {
 
       const participants: Map<number, Participant> = loadParticipants(bData["participants"], games, results);
       //const changes: Map<number, GameChange> = loadChanges(aData["changes"], teams, games);
-      const scores = loadScores(aData["scoring"], participants);
+      loadScores(aData["scoring"], participants);
 
       const data: Data = { games: games, results: results, participants: participants };
 
@@ -448,12 +474,14 @@ function Shell() {
   const firstGameId = iter?.next().value;
   const game = data && data.games.get(firstGameId);
   console.log(`first id = ${firstGameId}, game = ${game}`);
+  const participants = data && data.participants;
 
   return isLoading ?
     <div className="App">Loading...</div> :
-    (game ?
+    (game && participants ?
       <div>
-        <div><GameComponent data={data} game={game} /></div>
+        {/* <div><GameComponent data={data} game={game} /></div> */}
+        <Scoreboard participants={participants} />
       </div> : <div>?</div>);
 }
 
