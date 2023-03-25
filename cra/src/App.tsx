@@ -6,18 +6,20 @@ import { TemplateExpression, textChangeRangeIsUnchanged } from 'typescript';
 import './App.css';
 import GameComponent from './Game';
 import { Scoreboard } from './Scoreboard';
+import { DefaultParams, useRoute } from "wouter";
+
 
 /*export interface TeamWithScore {
   name: string;
   score?: number;
 }
-
+ 
 const loadTeamWithScore = (data: any) => {
   const team: TeamWithScore = { name: data.name };
   if (data.score !== "") {
     team.score = parseInt(data.score);
   }
-
+ 
   return team;
 };*/
 
@@ -454,35 +456,45 @@ function App() {
   );
 }
 
+function NotFound() {
+  return <div>Not Found</div>;
+}
+
 function Shell() {
   const { data, isLoading, status } = useQuery("results", fetchResults);
+  const [isScoreboard, _] = useRoute("/");
+  const [isGame, gameParams] = useRoute("/games/:id");
 
-  // useEffect(() => {
-  //   Promise.all([
-  //     fetch("https://danhodge-cfb.s3.amazonaws.com/2022/participants_2022.json"),
-  //     fetch("https://danhodge-cfb.s3.amazonaws.com/2022/results_2022.json"),
-  //   ]).then(([p, r]) => {
-  //     let x = p.json() as Promise<{ str: "" }>;
-  //     setParticipants(p.json() as Promise<{ str: "" });
-  //     setResults(r.json());
-  //   });
-  // });
+  var view = "scoreboard";
+  if (isGame && !isScoreboard) {
+    view = "game";
+  }
 
-  // TODO: game data not being loaded correctlty
-  const iter = data && data.games.keys()
-  iter?.next();
-  const firstGameId = iter?.next().value;
-  const game = data && data.games.get(firstGameId);
-  console.log(`first id = ${firstGameId}, game = ${game}`);
-  const participants = data && data.participants;
-
-  return isLoading ?
-    <div className="App">Loading...</div> :
-    (game && participants ?
-      <div>
-        {/* <div><GameComponent data={data} game={game} /></div> */}
-        <Scoreboard participants={participants} />
-      </div> : <div>?</div>);
+  const doneLoading = !isLoading && data;
+  return doneLoading ? loaded(data, view, gameParams) : loading();
 }
+
+const loading = () => {
+  return <div className="App">Loading...</div>;
+}
+
+const loaded = (data: Data, view: string, gameParams: DefaultParams | null) => {
+  return (view === "scoreboard") ?
+    <Scoreboard participants={data.participants} /> :
+    viewGame(data, gameParams);
+}
+
+const viewGame = (data: Data, gameParams: DefaultParams | null) => {
+  var game;
+  if (gameParams && gameParams.id) {
+    game = data.games.get(parseInt(gameParams.id));
+  }
+
+  return (game) ?
+    <GameComponent data={data} game={game} /> :
+    <Scoreboard participants={data.participants} />
+}
+
+
 
 export default App;

@@ -1,3 +1,4 @@
+import { Link } from "wouter";
 import { Participant } from "./App";
 
 export interface ScoreboardProps {
@@ -25,5 +26,9 @@ export const Scoreboard = (props: ScoreboardProps) => {
         </div>
     });
 
-    return <div className="bg-gray-50 gap-2 pl-6 pr-6 pt-4 w-3/5">{header}{rows}</div>;
+    return <div className="bg-gray-50 gap-2 pl-6 pr-6 pt-4 w-3/5">
+        {header}
+        {rows}
+        <div><Link href={"/games/" + "373"}>Click Here</Link></div>
+    </div>;
 };
