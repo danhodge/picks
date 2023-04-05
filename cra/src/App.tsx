@@ -7,6 +7,7 @@ import './App.css';
 import GameComponent from './Game';
 import { Scoreboard } from './Scoreboard';
 import { DefaultParams, useRoute } from "wouter";
+import { ParticipantComponent } from './Participant';
 
 
 /*export interface TeamWithScore {
@@ -60,6 +61,7 @@ export interface Pick {
 };
 
 export interface Participant {
+  id: number;
   name: string;
   tieBreaker: number;
   picks: Map<number, Pick>;
@@ -175,7 +177,7 @@ const loadParticipants = (data: any, games: Map<number, Game>, results: Map<numb
   const participants = new Map<number, Participant>();
   for (const idStr in data) {
     const id = parseInt(idStr);
-    participants.set(id, loadParticipant(data[id], games, results));
+    participants.set(id, loadParticipant(data[id], id, games, results));
   }
 
   return participants;
@@ -194,9 +196,10 @@ const loadPick = (data: any, game: Game | undefined, totalPoints: number) => {
   }
 }
 
-const loadParticipant = (data: any, games: Map<number, Game>, results: Map<number, GameOutcome>) => {
+const loadParticipant = (data: any, id: number, games: Map<number, Game>, results: Map<number, GameOutcome>) => {
   const picks = new Map<number, Pick>();
   const participant: Participant = {
+    id: id,
     name: data.name,
     tieBreaker: data.tiebreaker,
     picks: picks,
@@ -456,43 +459,58 @@ function App() {
   );
 }
 
-function NotFound() {
-  return <div>Not Found</div>;
-}
-
 function Shell() {
   const { data, isLoading, status } = useQuery("results", fetchResults);
   const [isScoreboard, _] = useRoute("/");
   const [isGame, gameParams] = useRoute("/games/:id");
+  const [isParticipant, participantParams] = useRoute("/participants/:id");
 
   var view = "scoreboard";
-  if (isGame && !isScoreboard) {
+  var params = null;
+  if (isGame && !isParticipant && !isScoreboard) {
     view = "game";
+    params = gameParams;
+  } else if (isParticipant && !isGame && !isScoreboard) {
+    view = "participant";
+    params = participantParams;
   }
 
   const doneLoading = !isLoading && data;
-  return doneLoading ? loaded(data, view, gameParams) : loading();
+  return doneLoading ?
+    <div className="bg-yellow-100 container px-4">
+      {loaded(data, view, params)}
+    </div> :
+    loading();
 }
 
 const loading = () => {
   return <div className="App">Loading...</div>;
 }
 
-const loaded = (data: Data, view: string, gameParams: DefaultParams | null) => {
+const loaded = (data: Data, view: string, params: DefaultParams | null) => {
   return (view === "scoreboard") ?
     <Scoreboard participants={data.participants} /> :
-    viewGame(data, gameParams);
+    (view === "game") ? viewGame(data, params) : viewParticipant(data, params);
 }
 
-const viewGame = (data: Data, gameParams: DefaultParams | null) => {
+const viewGame = (data: Data, params: DefaultParams | null) => {
   var game;
-  if (gameParams && gameParams.id) {
-    game = data.games.get(parseInt(gameParams.id));
+  if (params && params.id) {
+    game = data.games.get(parseInt(params.id));
   }
 
   return (game) ?
     <GameComponent data={data} game={game} /> :
     <Scoreboard participants={data.participants} />
+}
+
+const viewParticipant = (data: Data, params: DefaultParams | null) => {
+  var participant;
+  if (params && params.id) {
+    participant = data.participants.get(parseInt(params.id));
+  }
+
+  return (participant) ? <ParticipantComponent data={data} participant={participant} /> : <Scoreboard participants={data.participants} />;
 }
 
 

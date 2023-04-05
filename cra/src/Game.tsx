@@ -1,4 +1,5 @@
 import { Data, Game, GameOutcome, isCompleted, Participant, scoreForTeam, Team } from "./App";
+import { Link } from "wouter";
 
 export interface GameProps {
   data: Data;
@@ -16,10 +17,10 @@ export interface PicksProps {
 }
 
 class PickStats {
-  readonly picks: Map<string, number>;
+  readonly picks: Map<Participant, number>;
 
   constructor() {
-    this.picks = new Map<string, number>();
+    this.picks = new Map<Participant, number>();
   }
 
   totalPicks(): number {
@@ -34,8 +35,8 @@ class PickStats {
   }
 
   // TODO: store total points so it can be displayed and used for sorting
-  update(name: string, points: number, totalPoints: number): void {
-    this.picks.set(name, points);
+  update(participant: Participant, points: number, totalPoints: number): void {
+    this.picks.set(participant, points);
   }
 }
 
@@ -46,12 +47,12 @@ export interface PickGroupProps {
 }
 
 const PickGroup = (props: PickGroupProps) => {
-  const sorter = (a: [string, number], b: [string, number]) => {
+  const sorter = (a: [Participant, number], b: [Participant, number]) => {
     const [aName, aPoints] = a;
     const [bName, bPoints] = b;
     const diff = bPoints - aPoints; // sort by points descending
     if (diff === 0) {
-      return aName < bName ? -1 : 1; // sort by names ascending
+      return aName.name < bName.name ? -1 : 1; // sort by names ascending
     } else {
       return diff;
     }
@@ -59,11 +60,11 @@ const PickGroup = (props: PickGroupProps) => {
   const bgColors = ["bg-orange-300", "bg-blue-300"];
   const bgColor = (props.team === props.game.visitor) ? bgColors[0] : bgColors[1];
 
-  const rows = Array.from(props.stats.picks.entries()).sort(sorter).map((val: [string, number]) => {
-    const [name, points] = val;
+  const rows = Array.from(props.stats.picks.entries()).sort(sorter).map((val: [Participant, number]) => {
+    const [participant, points] = val;
     return <>
-      <div key={name + "_name"}>{name}</div>
-      <div className="font-thin" key={name + "_points"}>{points}</div>
+      <div key={participant.name + "_name"}><Link href={"/participants/" + participant.id}>{participant.name}</Link></div>
+      <div className="font-thin" key={participant.name + "_points"}>{points}</div>
     </>
   });
 
@@ -117,7 +118,7 @@ const GameComponent = (props: GameProps) => {
         stats = new PickStats();
         picksFor.set(pick.team.id, stats);
       }
-      stats.update(participant.name, pick.points, pick.totalPoints);
+      stats.update(participant, pick.points, pick.totalPoints);
     }
   });
 
