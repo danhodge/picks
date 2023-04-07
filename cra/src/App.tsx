@@ -6,7 +6,7 @@ import { TemplateExpression, textChangeRangeIsUnchanged } from 'typescript';
 import './App.css';
 import GameComponent from './Game';
 import { Scoreboard } from './Scoreboard';
-import { DefaultParams, useRoute } from "wouter";
+import { DefaultParams, Link, useRoute } from "wouter";
 import { ParticipantComponent } from './Participant';
 
 
@@ -477,9 +477,20 @@ function Shell() {
 
   const doneLoading = !isLoading && data;
   return doneLoading ?
-    <div className="bg-yellow-100 container px-4">
-      {loaded(data, view, params)}
-    </div> :
+    <div className="flex flex-col bg-yellow-100 container min-w-full">
+      <header className="bg-yellow-200 container flex flex-row items-center sticky top-0 left-0 min-w-full h-14 px-4">
+        <div className="flex-none basis-1/8 text-sm">2021-22</div>
+        <div className="flex-none text-center basis-1/4 text-base font-semibold">
+          <Link href="/">
+            <span className="hover:text-orange-500 cursor-pointer">Standings</span>
+          </Link>
+        </div>
+        <div className="flex-none basis-5/8 text-base">Games</div>
+      </header>
+      <main className="flex-1 flex flex-wrap">
+        {loaded(data, view, params)}
+      </main>
+    </div > :
     loading();
 }
 
