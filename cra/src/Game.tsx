@@ -135,10 +135,15 @@ const GameComponent = (props: GameProps) => {
   // });
   //const pointsWonIndex = gamesByPointsWon.indexOf(props.game);
 
-  return <div className="bg-yellow-100 container mx-auto">
+  const time = new Date(Date.parse(props.game.time)).toLocaleDateString("en-US", { weekday: 'short', month: "short", day: "numeric", hour: "numeric", minute: "numeric" });
+
+  return <div className="bg-yellow-100 container mx-auto pt-10">
     <div className="pb-5">
       <p className="font-semibold text-xl">{props.game.name}</p>
-      <p className="font-thin text-sm">{props.game.location}</p>
+      <p className="font-thin text-sm">
+        <span>{props.game.location}</span>
+        <span className="p-4">{time}</span>
+      </p>
     </div>
     <div className="w-80">
       <div className="bg-gray-50 rounded-lg border-2 border-slate-600 grid grid-cols-5 gap-2 p-3">

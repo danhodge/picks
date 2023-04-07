@@ -7,34 +7,48 @@ export interface ParticipantComponentProps {
 }
 
 export const ParticipantComponent = (props: ParticipantComponentProps) => {
-  const rowBg = ["bg-blue-300", "bg-blue-400"];
+  const rowBg = ["bg-slate-50", "bg-white"];
+  var prevDate: string = "";
   const results = Array.from(props.participant.picks.entries()).map((val: [number, Pick], idx: number) => {
     const [_, pick] = val;
     const outcome = props.data.results.get(pick.game.id);
+    const date = new Date(Date.parse(pick.game.time)).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    var borderStyle = "";
+    if (prevDate !== "" && date !== prevDate) {
+      prevDate = date;
+      borderStyle = " border-t-2 border-slate-400 pt-4";
+    } else if (prevDate === "") {
+      prevDate = date;
+    }
 
-    return <div className={"grid grid-cols-7 " + rowBg[idx % 2]}>
-      <div><Link href={"/games/" + pick.game.id}>{pick.game.name}</Link></div>
-      <div>{pick.team.name}</div>
-      <div></div>
-      <div className="font-semibold">{(outcome?.pointsAwardedTo === pick.team) ? pick.points : ""}</div>
-      <div className="font-thin">{(outcome?.pointsAwardedTo !== pick.team) ? pick.points : ""}</div>
-      <div>{pick.totalPoints}</div>
-      <div>{place(props.data.participants, props.participant, pick.game, pick.totalPoints)}</div>
-    </div>;
-  });
-  return <div>
-    <div className="pb-4 pl-2 pt-2 font-semibold">{props.participant.name}</div>
-    <div className="p-2 bg-blue-300 rounded-lg w-4/5">
-      <div className="grid grid-cols-7 font-semibold border-b border-slate-500">
-        <div>Game</div>
-        <div>Team</div>
-        <div></div>
-        <div>Points Won</div>
-        <div>Points Lost</div>
-        <div>Total</div>
-        <div>Place</div>
+    return <>
+      <div className={rowBg[idx % 2] + borderStyle + " text-sm p-1"}>{date}</div>
+      <div className={rowBg[idx % 2] + borderStyle + " col-span-3 text-sm hover:text-orange-500 cursor-pointer p-1"}><Link href={"/games/" + pick.game.id}>{pick.game.name}</Link></div>
+      {/* TOOD: show team (points) for games that have not finished yet */}
+      <div className={rowBg[idx % 2] + borderStyle + " col-span-2 text-sm p-1"}>{pick.team.name}</div>
+      <div className={rowBg[idx % 2] + borderStyle + " text-sm p-1"}></div>
+      <div className={rowBg[idx % 2] + borderStyle + " text-sm font-thin p-1 grid grid-cols-4"}>
+        <div className="text-right">{(outcome?.pointsAwardedTo === pick.team) ? "" : "-"}</div>
+        <div className="text-left">{pick.points}</div>
+        <div className="col-span-2"></div>
       </div>
-      {results}
+      <div className={rowBg[idx % 2] + borderStyle + " text-sm p-1"}>{pick.totalPoints}</div>
+      <div className={rowBg[idx % 2] + borderStyle + " text-sm p-1"}>{place(props.data.participants, props.participant, pick.game, pick.totalPoints)}</div>
+    </>;
+  });
+  return <div className="gap-2 pl-6 pr-6 container w-4/5">
+    <div className="bg-slate-50 rounded-lg pl-3 pt-12">
+      <div className="pb-4 pt-2 font-semibold">{props.participant.name}</div>
+      <div className="pt-2 grid grid-cols-10 w-4/5">
+        <div className="font-semibold">Date</div>
+        <div className="font-semibold col-span-3">Game</div>
+        <div className="font-semibold col-span-2">Choice</div>
+        <div></div>
+        <div className="font-semibold">Change</div>
+        <div className="font-semibold">Total</div>
+        <div className="font-semibold">Place</div>
+        {results}
+      </div>
     </div>
   </div >;
 };
