@@ -439,7 +439,15 @@ export interface GameStats {
 //   }
 // };
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+    }
+  }
+});
 
 /*
 [{path: "2021", name: "2021-22"}, {path: "2021a", name: "2021-22 test"}]
