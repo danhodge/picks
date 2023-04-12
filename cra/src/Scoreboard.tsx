@@ -1,8 +1,9 @@
 import { Link } from "wouter";
-import { Participant } from "./App";
+import { Participant, Season } from "./App";
 
 export interface ScoreboardProps {
   participants: Map<number, Participant>;
+  season: Season;
 }
 
 export const Scoreboard = (props: ScoreboardProps) => {
@@ -20,7 +21,7 @@ export const Scoreboard = (props: ScoreboardProps) => {
     return <>
       <div className="col-span-4 grid grid-cols-9">
         <div className="text-sm">{idx + 1}.</div>
-        <div className="text-sm hover:text-orange-500 cursor-pointer col-span-8"><Link href={"/participants/" + val.id}>{val.name}</Link></div>
+        <div className="text-sm hover:text-orange-500 cursor-pointer col-span-8"><Link href={"/" + props.season.path + "/participants/" + val.id}>{val.name}</Link></div>
       </div>
       <div className="col-span-2 text-sm p-1">{val.score.pointsWon}</div>
       <div className="col-span-2 text-sm">{val.score.pointsLost}</div>

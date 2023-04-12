@@ -23,7 +23,7 @@ export const ParticipantComponent = (props: ParticipantComponentProps) => {
 
     return <>
       <div className={rowBg[idx % 2] + borderStyle + " text-sm p-1"}>{date}</div>
-      <div className={rowBg[idx % 2] + borderStyle + " col-span-3 text-sm hover:text-orange-500 cursor-pointer p-1"}><Link href={"/games/" + pick.game.id}>{pick.game.name}</Link></div>
+      <div className={rowBg[idx % 2] + borderStyle + " col-span-3 text-sm hover:text-orange-500 cursor-pointer p-1"}><Link href={"/" + props.data.season.path + "/games/" + pick.game.id}>{pick.game.name}</Link></div>
       {/* TOOD: show team (points) for games that have not finished yet */}
       <div className={rowBg[idx % 2] + borderStyle + " col-span-2 text-sm p-1"}>{pick.team.name}</div>
       <div className={rowBg[idx % 2] + borderStyle + " text-sm p-1"}></div>

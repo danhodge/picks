@@ -6,8 +6,9 @@ import { TemplateExpression, textChangeRangeIsUnchanged } from 'typescript';
 import './App.css';
 import GameComponent from './Game';
 import { Scoreboard } from './Scoreboard';
-import { DefaultParams, Link, useRoute } from "wouter";
+import { DefaultParams, Link, Redirect, Route, Switch, useLocation, useRoute } from "wouter";
 import { ParticipantComponent } from './Participant';
+import { SeasonSelector } from './SeasonSelector';
 
 
 /*export interface TeamWithScore {
@@ -24,6 +25,7 @@ const loadTeamWithScore = (data: any) => {
   return team;
 };*/
 
+// TODO: make season a property on Game
 export interface Game {
   id: number;
   name: string;
@@ -78,9 +80,16 @@ export interface Score {
 }
 
 export interface Data {
+  seasons: Array<Season>;
+  season: Season;
   games: Map<number, Game>;
   participants: Map<number, Participant>;
   results: Map<number, GameOutcome>;
+}
+
+export interface Season {
+  path: string;
+  name: string;
 }
 
 const unknownGame = () => {
@@ -123,6 +132,15 @@ const loadGame = (data: any, id: number, teams: Map<number, Team>) => {
 //     //game.scores.push(score);
 //   }
 // }
+
+const loadSeasons = (data: any) => {
+  var seasons = new Array<Season>();
+  for (const season of data) {
+    seasons.push({ path: season.path, name: season.name });
+  }
+
+  return seasons;
+}
 
 const loadTeams = (data: any) => {
   const teams = new Map<number, Team>();
@@ -423,32 +441,57 @@ export interface GameStats {
 
 const queryClient = new QueryClient();
 
-const fetchResults = async () => {
-  const res1 = Promise.all([
-    fetch("https://danhodge-cfb.s3.amazonaws.com/development/2021/results.json"),
-    fetch("https://danhodge-cfb.s3.amazonaws.com/development/2021/participants.json")
-  ]).then(([r1, r2]) => [r1.json(), r2.json()])
-    .then(async ([a, b]) => {
-      //const games: Array<Game> = (await a).map(loadGame);
-      //const gamesMap = new Map<string, Game>();
-      //games.forEach(game => gamesMap.set(game.name, game));
-      const bData = await b;
-      const teams: Map<number, Team> = loadTeams(bData["teams"]);
-      const games: Map<number, Game> = loadGames(bData["games"], teams);
+/*
+[{path: "2021", name: "2021-22"}, {path: "2021a", name: "2021-22 test"}]
+*/
 
-      const aData = await a;
-      const results: Map<number, GameOutcome> = loadResults(aData["results"], teams, games);
+const fetchResults = async (season: string | undefined) => {
+  // TODO: handle non-2xx response codes gracefully
+  return fetch("https://danhodge-cfb.s3.amazonaws.com/development/seasons.json")
+    .then((result) => result.json())
+    .then(async (seasons) => {
+      const seasonData = loadSeasons(await seasons);
+      if (seasonData.length === 0) {
+        return {
+          seasons: seasonData,
+          season: { name: "U", path: "U" },
+          games: new Map<number, Game>(),
+          results: new Map<number, GameOutcome>(),
+          participants: new Map<number, Participant>(),
+        };
+      } else {
+        const requestedSeason = seasonData.find((val) => (season !== "unknown") && (val.path === season));
+        const path = (requestedSeason) ? requestedSeason.path : seasonData[0].path;
+        const resultsUrl = `https://danhodge-cfb.s3.amazonaws.com/development/${path}/results.json`;
+        const participantsUrl = `https://danhodge-cfb.s3.amazonaws.com/development/${path}/participants.json`;
 
-      const participants: Map<number, Participant> = loadParticipants(bData["participants"], games, results);
-      //const changes: Map<number, GameChange> = loadChanges(aData["changes"], teams, games);
-      loadScores(aData["scoring"], participants);
+        return Promise
+          .all([fetch(resultsUrl), fetch(participantsUrl)])
+          .then(([resultData, participantData]) => [resultData.json(), participantData.json()])
+          .then(async ([resultJSON, participantJSON]) => {
+            const participantData = await participantJSON;
+            const teams: Map<number, Team> = loadTeams(participantData["teams"]);
+            const games: Map<number, Game> = loadGames(participantData["games"], teams);
 
-      const data: Data = { games: games, results: results, participants: participants };
+            const resultData = await resultJSON;
+            const results: Map<number, GameOutcome> = loadResults(resultData["results"], teams, games);
 
-      return data;
-    });
+            const participants: Map<number, Participant> = loadParticipants(participantData["participants"], games, results);
+            //const changes: Map<number, GameChange> = loadChanges(aData["changes"], teams, games);
+            loadScores(resultData["scoring"], participants);
 
-  return res1;
+            const data: Data = {
+              seasons: seasonData,
+              season: seasonData[0],
+              games: games,
+              results: results,
+              participants: participants
+            };
+
+            return data;
+          });
+      }
+    })
 };
 
 function App() {
@@ -460,32 +503,52 @@ function App() {
 }
 
 function Shell() {
-  const { data, isLoading, status } = useQuery("results", fetchResults);
-  const [isScoreboard, _] = useRoute("/");
-  const [isGame, gameParams] = useRoute("/games/:id");
-  const [isParticipant, participantParams] = useRoute("/participants/:id");
+  const [isRoot, _] = useRoute("/");
+  const [isScoreboard, scoreboardParams] = useRoute("/:season");
+  const [isGame, gameParams] = useRoute("/:season/games/:id");
+  const [isParticipant, participantParams] = useRoute("/:season/participants/:id");
+  const [location, setLocation] = useLocation();
 
-  var view = "scoreboard";
+  var view = "redirect";
   var params = null;
-  if (isGame && !isParticipant && !isScoreboard) {
+  if (isGame) {
     view = "game";
     params = gameParams;
-  } else if (isParticipant && !isGame && !isScoreboard) {
+  } else if (isParticipant) {
     view = "participant";
     params = participantParams;
+  } else if (isScoreboard) {
+    view = "scoreboard";
+    params = scoreboardParams;
   }
+
+  const [season, setSeason] = useState(params ? params.season : "unknown");
+
+  const { data, isLoading, status } = useQuery(["results", season], () => fetchResults(season));
+
+  if (view === "redirect") {
+    const now = new Date(Date.now());
+    const curYear = (now.getMonth() === 0 && now.getDate() < 15) ? now.getFullYear() - 1 : now.getFullYear();
+    return <Redirect to={"/" + curYear} />;
+  }
+
+  const setSeasonLocation = (season: string) => {
+    setSeason(season);
+    setLocation(`/${season}`);
+  };
 
   const doneLoading = !isLoading && data;
   return doneLoading ?
     <div className="flex flex-col bg-yellow-100 container min-w-full">
       <header className="bg-yellow-200 container flex flex-row items-center sticky top-0 left-0 min-w-full h-14 px-4">
-        <div className="flex-none basis-1/8 text-sm">2021-22</div>
+        <div className="flex-none basis-1/8 text-sm">
+          <SeasonSelector seasons={data.seasons} selected={data.season} setSeason={setSeasonLocation} />
+        </div>
         <div className="flex-none text-center basis-1/4 text-base font-semibold">
-          <Link href="/">
+          <Link href={"/" + data.season.path}>
             <span className="hover:text-orange-500 cursor-pointer">Standings</span>
           </Link>
         </div>
-        <div className="flex-none basis-5/8 text-base">Games</div>
       </header>
       <main className="flex-1 flex flex-wrap">
         {loaded(data, view, params)}
@@ -500,7 +563,7 @@ const loading = () => {
 
 const loaded = (data: Data, view: string, params: DefaultParams | null) => {
   return (view === "scoreboard") ?
-    <Scoreboard participants={data.participants} /> :
+    <Scoreboard season={data.season} participants={data.participants} /> :
     (view === "game") ? viewGame(data, params) : viewParticipant(data, params);
 }
 
@@ -512,7 +575,7 @@ const viewGame = (data: Data, params: DefaultParams | null) => {
 
   return (game) ?
     <GameComponent data={data} game={game} /> :
-    <Scoreboard participants={data.participants} />
+    <Scoreboard participants={data.participants} season={data.season} />
 }
 
 const viewParticipant = (data: Data, params: DefaultParams | null) => {
@@ -521,9 +584,7 @@ const viewParticipant = (data: Data, params: DefaultParams | null) => {
     participant = data.participants.get(parseInt(params.id));
   }
 
-  return (participant) ? <ParticipantComponent data={data} participant={participant} /> : <Scoreboard participants={data.participants} />;
+  return (participant) ? <ParticipantComponent data={data} participant={participant} /> : <Scoreboard participants={data.participants} season={data.season} />;
 }
-
-
 
 export default App;
