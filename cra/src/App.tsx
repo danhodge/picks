@@ -469,7 +469,8 @@ const fetchResults = async (season: string | undefined) => {
         };
       } else {
         const requestedSeason = seasonData.find((val) => (season !== "unknown") && (val.path === season));
-        const path = (requestedSeason) ? requestedSeason.path : seasonData[0].path;
+        const actualSeason = (requestedSeason) ? requestedSeason : seasonData[0];
+        const path = actualSeason.path;
         const resultsUrl = `https://danhodge-cfb.s3.amazonaws.com/development/${path}/results.json`;
         const participantsUrl = `https://danhodge-cfb.s3.amazonaws.com/development/${path}/participants.json`;
 
@@ -490,7 +491,7 @@ const fetchResults = async (season: string | undefined) => {
 
             const data: Data = {
               seasons: seasonData,
-              season: seasonData[0],
+              season: actualSeason,
               games: games,
               results: results,
               participants: participants
@@ -530,6 +531,7 @@ function Shell() {
     params = scoreboardParams;
   }
 
+  // TODO: rewrite URL when given /undefined_season
   const [season, setSeason] = useState(params ? params.season : "unknown");
 
   const { data, isLoading, status } = useQuery(["results", season], () => fetchResults(season));
