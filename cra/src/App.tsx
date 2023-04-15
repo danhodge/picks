@@ -531,7 +531,6 @@ function Shell() {
     params = scoreboardParams;
   }
 
-  // TODO: rewrite URL when given /undefined_season
   const [season, setSeason] = useState(params ? params.season : "unknown");
 
   const { data, isLoading, status } = useQuery(["results", season], () => fetchResults(season));

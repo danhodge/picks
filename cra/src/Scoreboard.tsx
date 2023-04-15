@@ -1,5 +1,6 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Participant, Season } from "./App";
+import { useEffect } from "react";
 
 export interface ScoreboardProps {
   participants: Map<number, Participant>;
@@ -7,6 +8,14 @@ export interface ScoreboardProps {
 }
 
 export const Scoreboard = (props: ScoreboardProps) => {
+  const [_, setLocation] = useLocation();
+
+  useEffect(() => {
+    // all requests for unknown paths get sent to Scoreboard so update 
+    // the location on load to clear out any bad state
+    setLocation(`/${props.season.path}`);
+  });
+
   const sorter = (a: Participant, b: Participant) => {
     return b.score.pointsWon - a.score.pointsWon;
   };
