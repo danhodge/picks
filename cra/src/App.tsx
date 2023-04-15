@@ -33,15 +33,14 @@ export interface Game {
   time: string;
   visitor: Team;
   home: Team;
-  //scores: Array<FinalScore>;
-  //totalPoints: number;
-  //totalPointsWon?: number;
+  prevVisitor?: Team;
+  prevHome?: Team;
 };
 
 export interface GameOutcome {
   status: string;
-  pointsAwardedTo: Team;
-  finalScores: Map<number, number>;
+  pointsAwardedTo?: Team;
+  finalScores?: Map<number, number>;
 };
 
 export interface Team {
@@ -201,12 +200,33 @@ const loadParticipants = (data: any, games: Map<number, Game>, results: Map<numb
   return participants;
 }
 
+const applyChanges = (data: any, teams: Map<number, Team>, games: Map<number, Game>) => {
+  for (const idStr in data) {
+    const gameId = parseInt(idStr);
+    const game = games.get(gameId);
+    if (game) {
+      for (const change of data[idStr]) {
+        const origTeam = teams.get(parseInt(change.original_team_id));
+        const newTeam = teams.get(parseInt(change.new_team_id));
+        if (origTeam && newTeam) {
+          if (game.home === newTeam) {
+            game.prevHome = origTeam;
+          }
+          if (game.visitor === newTeam) {
+            game.prevVisitor = origTeam;
+          }
+        }
+      }
+    }
+  }
+}
+
 const loadPick = (data: any, game: Game | undefined, totalPoints: number) => {
   if (!game) {
     return undefined;
   }
 
-  const team = [game.home, game.visitor].find((team: Team) => team.id === data.team_id);
+  const team = [(game.prevHome || game.home), (game.prevVisitor || game.visitor)].find((team: Team) => team.id === data.team_id);
   if (team) {
     return { game: game, team: team, points: data.points, totalPoints: totalPoints };
   } else {
@@ -291,7 +311,7 @@ export const isCompleted = (outcome: GameOutcome | undefined) => {
 };
 
 export const scoreForTeam = (outcome: GameOutcome | undefined, targetTeam: Team) => {
-  if (!outcome) {
+  if (!outcome || !outcome.finalScores) {
     return undefined;
   }
   return outcome.finalScores.get(targetTeam.id);
@@ -484,9 +504,9 @@ const fetchResults = async (season: string | undefined) => {
 
             const resultData = await resultJSON;
             const results: Map<number, GameOutcome> = loadResults(resultData["results"], teams, games);
+            applyChanges(resultData["changes"], teams, games);
 
             const participants: Map<number, Participant> = loadParticipants(participantData["participants"], games, results);
-            //const changes: Map<number, GameChange> = loadChanges(aData["changes"], teams, games);
             loadScores(resultData["scoring"], participants);
 
             const data: Data = {

@@ -84,10 +84,18 @@ const PickGroup = (props: PickGroupProps) => {
   </div>;
 };
 
+const pickVisitor = (game: Game) => {
+  return game.prevVisitor ? game.prevVisitor : game.visitor;
+};
+
+const pickHome = (game: Game) => {
+  return game.prevHome ? game.prevHome : game.home;
+};
+
 const Picks = (props: PicksProps) => {
   const sections = Array.from(props.picksFor.entries()).map((val: [number, PickStats]) => {
     const [id, stats] = val;
-    const team = props.game.home.id === id ? props.game.home : props.game.visitor;
+    const team = pickHome(props.game).id === id ? pickHome(props.game) : pickVisitor(props.game);
     const groupId = `${props.game.id}_${team.id}`;
     return <PickGroup key={groupId} team={team} game={props.game} stats={stats} season={props.season} />;
   });
@@ -104,13 +112,28 @@ const Picks = (props: PicksProps) => {
   </div>;
 }
 
+interface GameResultProps {
+  game: Game;
+  outcome: GameOutcome;
+}
+
+const FinalScore = (props: GameResultProps) => {
+  return <>
+    <div className="bg-gray-50 rounded-lg border-2 border-slate-600 grid grid-cols-5 gap-2 p-3">
+      <TeamScore team={props.game.visitor} outcome={props.outcome} />
+      <TeamScore team={props.game.home} outcome={props.outcome} />
+    </div>
+    <div className="mb-8 text-right font-semibold text-md italic pr-3">final</div>
+  </>;
+}
+
 const GameComponent = (props: GameProps) => {
-  const outcome = props.data.results.get(props.game.id);
+  const outcome = props.data.results.get(props.game.id) || { status: "incomplete" };
 
   // populate the picksFor map to ensure that the visiting team is always first
   const picksFor = new Map<number, PickStats>();
-  picksFor.set(props.game.visitor.id, new PickStats());
-  picksFor.set(props.game.home.id, new PickStats());
+  picksFor.set(pickVisitor(props.game).id, new PickStats());
+  picksFor.set(pickHome(props.game).id, new PickStats());
 
   props.data.participants.forEach((participant: Participant) => {
     const pick = participant.picks.get(props.game.id);
@@ -139,6 +162,7 @@ const GameComponent = (props: GameProps) => {
 
   const time = new Date(Date.parse(props.game.time)).toLocaleDateString("en-US", { weekday: 'short', month: "short", day: "numeric", hour: "numeric", minute: "numeric" });
 
+  // TODO: what to display when a team changes?
   return <div className="bg-yellow-100 container mx-auto pt-10">
     <div className="pb-5">
       <p className="font-semibold text-xl">{props.game.name}</p>
@@ -148,11 +172,7 @@ const GameComponent = (props: GameProps) => {
       </p>
     </div>
     <div className="w-80">
-      <div className="bg-gray-50 rounded-lg border-2 border-slate-600 grid grid-cols-5 gap-2 p-3">
-        <TeamScore team={props.game.visitor} outcome={outcome} />
-        <TeamScore team={props.game.home} outcome={outcome} />
-      </div>
-      <div className="mb-8 text-right font-semibold text-md italic pr-3">final</div>
+      {outcome.status === "completed" ? <FinalScore game={props.game} outcome={outcome} /> : <></>}
     </div>
     <Picks game={props.game} picksFor={picksFor} season={props.data.season} />
     {/* <div>Total Points Wagered - {props.game.totalPoints} (#{wageredIndex + 1})</div>
