@@ -101,13 +101,6 @@ const Picks = (props: PicksProps) => {
   });
 
   return <div>
-    <div>
-      Sort by <select>
-        <option>Place Change</option>
-        <option>Current Place</option>
-        <option>Final Place</option>
-      </select>
-    </div>
     <div>{sections}</div>
   </div>;
 }
@@ -118,13 +111,20 @@ interface GameResultProps {
 }
 
 const FinalScore = (props: GameResultProps) => {
-  return <>
+  return <div className="w-80">
     <div className="bg-gray-50 rounded-lg border-2 border-slate-600 grid grid-cols-5 gap-2 p-3">
       <TeamScore team={props.game.visitor} outcome={props.outcome} />
       <TeamScore team={props.game.home} outcome={props.outcome} />
     </div>
     <div className="mb-8 text-right font-semibold text-md italic pr-3">final</div>
-  </>;
+  </div>;
+}
+
+const Forfeit = (props: GameResultProps) => {
+  return <div className="pb-6 font-light">
+    Game forfeited by <span className="underline">{props.outcome.forfeitedBy?.name}</span>,
+    points awarded to <span className="underline font-semibold">{props.outcome.pointsAwardedTo?.name}</span>
+  </div>
 }
 
 const GameComponent = (props: GameProps) => {
@@ -171,8 +171,10 @@ const GameComponent = (props: GameProps) => {
         <span className="p-4">{time}</span>
       </p>
     </div>
-    <div className="w-80">
-      {outcome.status === "completed" ? <FinalScore game={props.game} outcome={outcome} /> : <></>}
+    <div className="w-1/2">
+      {outcome.status === "completed" ?
+        <FinalScore game={props.game} outcome={outcome} /> :
+        outcome.status === "forfeited" ? <Forfeit game={props.game} outcome={outcome} /> : <></>}
     </div>
     <Picks game={props.game} picksFor={picksFor} season={props.data.season} />
     {/* <div>Total Points Wagered - {props.game.totalPoints} (#{wageredIndex + 1})</div>

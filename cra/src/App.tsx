@@ -40,6 +40,7 @@ export interface Game {
 export interface GameOutcome {
   status: string;
   pointsAwardedTo?: Team;
+  forfeitedBy?: Team;
   finalScores?: Map<number, number>;
 };
 
@@ -177,12 +178,18 @@ const loadResults = (data: any, teams: Map<number, Team>, games: Map<number, Gam
       }
     }
 
-    if (game && winner && scores.size === 2) {
+    if (game && winner) {
       const outcome: GameOutcome = {
         status: data[id].status,
         pointsAwardedTo: winner,
-        finalScores: scores
       };
+      if (scores.size === 2) {
+        outcome.finalScores = scores;
+      }
+      const forfeitedBy = teams.get(data[id].forfeited_by);
+      if (forfeitedBy) {
+        outcome.forfeitedBy = forfeitedBy;
+      }
       results.set(id, outcome);
     }
   }
