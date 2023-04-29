@@ -39,7 +39,7 @@ class UpdateScores
             GameChange.where(
               game: game, 
               new_team: Team.where(name: Team.normalize_name(status.home_name)).first_or_create!,
-              previous_visiting_team: game.home
+              previous_home_team: game.home
             ).first_or_create!
           end
         end

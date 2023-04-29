@@ -60,7 +60,7 @@ const PickGroup = (props: PickGroupProps) => {
     }
   };
   const bgColors = ["bg-orange-300", "bg-blue-300"];
-  const bgColor = (props.team === props.game.visitor) ? bgColors[0] : bgColors[1];
+  const bgColor = (props.team === pickVisitor(props.game)) ? bgColors[0] : bgColors[1];
 
   const rows = Array.from(props.stats.picks.entries()).sort(sorter).map((val: [Participant, number]) => {
     const [participant, points] = val;
@@ -111,12 +111,20 @@ interface GameResultProps {
 }
 
 const FinalScore = (props: GameResultProps) => {
+  const disclaimer = (props.game.prevHome) ?
+    <div className="font-light pb-6"><span className="underline">{props.game.home.name}</span> replaced <span className="underline">{props.game.prevHome.name}</span></div> :
+    (props.game.prevVisitor) ?
+      <div className="font-light pb-6"><span className="underline">{props.game.visitor.name}</span> replaced <span className="underline">{props.game.prevVisitor.name}</span></div> :
+      <div />;
+
+
   return <div className="w-80">
     <div className="bg-gray-50 rounded-lg border-2 border-slate-600 grid grid-cols-5 gap-2 p-3">
       <TeamScore team={props.game.visitor} outcome={props.outcome} />
       <TeamScore team={props.game.home} outcome={props.outcome} />
     </div>
     <div className="mb-8 text-right font-semibold text-md italic pr-3">final</div>
+    {disclaimer}
   </div>;
 }
 

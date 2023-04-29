@@ -215,11 +215,14 @@ const applyChanges = (data: any, teams: Map<number, Team>, games: Map<number, Ga
       for (const change of data[idStr]) {
         const origTeam = teams.get(parseInt(change.original_team_id));
         const newTeam = teams.get(parseInt(change.new_team_id));
+
         if (origTeam && newTeam) {
-          if (game.home === newTeam) {
+          if (game.home === origTeam) {
+            game.home = newTeam;
             game.prevHome = origTeam;
           }
-          if (game.visitor === newTeam) {
+          if (game.visitor === origTeam) {
+            game.visitor = newTeam;
             game.prevVisitor = origTeam;
           }
         }

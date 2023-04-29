@@ -56,13 +56,3 @@ class GameStatus
     @visitor = prev_home
   end
 end
-
-
-# quarter = score[:status][:quarter].gsub(/[^\d]/, "")
-#       remaining_secs =
-#         if (remaining = score[:status][:remaining])
-#           mins, secs = remaining.split(":").map(&:to_i)
-#           secs + mins * 60
-#         else
-#           0
-#         end
