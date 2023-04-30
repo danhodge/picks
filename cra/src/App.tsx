@@ -268,7 +268,7 @@ const loadParticipant = (data: any, id: number, games: Map<number, Game>, result
 
     if (game && pick) {
       const outcome = results.get(game.id);
-      if (outcome && outcome.status === "completed" && outcome.pointsAwardedTo === pick.team) {
+      if (outcome && (outcome.status === "completed" || outcome.status === "forfeited") && outcome.pointsAwardedTo === pick.team) {
         pointTotal += pick.points;
         pick.totalPoints = pointTotal;
       }

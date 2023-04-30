@@ -12,6 +12,7 @@ export const ParticipantComponent = (props: ParticipantComponentProps) => {
   const results = Array.from(props.participant.picks.entries()).map((val: [number, Pick], idx: number) => {
     const [_, pick] = val;
     const outcome = props.data.results.get(pick.game.id);
+    const isDone = (outcome?.status === "completed" || outcome?.status === "forfeited");
     const date = new Date(Date.parse(pick.game.time)).toLocaleDateString("en-US", { month: "short", day: "numeric" });
     var borderStyle = "";
     if (prevDate !== "" && date !== prevDate) {
@@ -27,13 +28,13 @@ export const ParticipantComponent = (props: ParticipantComponentProps) => {
       {/* TOOD: show team (points) for games that have not finished yet */}
       <div className={rowBg[idx % 2] + borderStyle + " col-span-2 text-sm p-1"}>{pick.team.name}</div>
       <div className={rowBg[idx % 2] + borderStyle + " text-sm p-1"}></div>
-      <div className={rowBg[idx % 2] + borderStyle + " text-sm font-thin p-1 grid grid-cols-4"}>
-        <div className="text-right">{(outcome?.pointsAwardedTo === pick.team) ? "" : "-"}</div>
-        <div className="text-left">{pick.points}</div>
-        <div className="col-span-2"></div>
+      <div className={rowBg[idx % 2] + borderStyle + " text-sm p-1 grid grid-cols-4"}>
+        <div className="col-span-1"></div>
+        <div className="text-center">{(outcome?.pointsAwardedTo === pick.team) ? pick.points : (isDone ? `(${pick.points})` : <span className="font-thin">{pick.points}</span>)}</div>
+        <div className="col-span-1"></div>
       </div>
-      <div className={rowBg[idx % 2] + borderStyle + " text-sm p-1"}>{pick.totalPoints}</div>
-      <div className={rowBg[idx % 2] + borderStyle + " text-sm p-1"}>{place(props.data.participants, props.participant, pick.game, pick.totalPoints)}</div>
+      <div className={rowBg[idx % 2] + borderStyle + " text-sm p-1"}>{isDone ? pick.totalPoints : ""}</div>
+      <div className={rowBg[idx % 2] + borderStyle + " text-sm p-1"}>{isDone ? place(props.data.participants, props.participant, pick.game, pick.totalPoints) : ""}</div>
     </>;
   });
   return <div className="gap-2 pl-6 pr-6 container w-4/5">
@@ -44,7 +45,7 @@ export const ParticipantComponent = (props: ParticipantComponentProps) => {
         <div className="font-semibold col-span-3">Game</div>
         <div className="font-semibold col-span-2">Choice</div>
         <div></div>
-        <div className="font-semibold">Change</div>
+        <div className="font-semibold">Points</div>
         <div className="font-semibold">Total</div>
         <div className="font-semibold">Place</div>
         {results}
