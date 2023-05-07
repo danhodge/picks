@@ -30,17 +30,17 @@ export const ParticipantComponent = (props: ParticipantComponentProps) => {
       <div className={rowBg[idx % 2] + borderStyle + " text-sm p-1"}></div>
       <div className={rowBg[idx % 2] + borderStyle + " text-sm p-1 grid grid-cols-4"}>
         <div className="col-span-1"></div>
-        <div className="text-center">{(outcome?.pointsAwardedTo === pick.team) ? pick.points : (isDone ? `(${pick.points})` : <span className="font-thin">{pick.points}</span>)}</div>
+        <div className="text-center">{(outcome?.pointsAwardedTo === pick.team) ? pick.points : (isDone ? <span className="text-red-400">{pick.points}</span> : <span className="font-thin">{pick.points}</span>)}</div>
         <div className="col-span-1"></div>
       </div>
       <div className={rowBg[idx % 2] + borderStyle + " text-sm p-1"}>{isDone ? pick.totalPoints : ""}</div>
       <div className={rowBg[idx % 2] + borderStyle + " text-sm p-1"}>{isDone ? place(props.data.participants, props.participant, pick.game, pick.totalPoints) : ""}</div>
     </>;
   });
-  return <div className="gap-2 pl-6 pr-6 container w-4/5">
+  return <div className="gap-2 pl-6 pr-6 container w-3/5">
     <div className="bg-slate-50 rounded-lg pl-3 pt-12">
       <div className="pb-4 pt-2 font-semibold">{props.participant.name}</div>
-      <div className="pt-2 grid grid-cols-10 w-4/5">
+      <div className="pt-2 grid grid-cols-10">
         <div className="font-semibold">Date</div>
         <div className="font-semibold col-span-3">Game</div>
         <div className="font-semibold col-span-2">Choice</div>

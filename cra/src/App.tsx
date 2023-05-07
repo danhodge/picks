@@ -583,11 +583,14 @@ function Shell() {
         <div className="flex-none basis-1/8 text-sm">
           <SeasonSelector seasons={data.seasons} selected={data.season} setSeason={setSeasonLocation} />
         </div>
-        <div className="flex-none text-center basis-1/4 text-base font-semibold">
-          <Link href={"/" + data.season.path}>
-            <span className="hover:text-orange-500 cursor-pointer">Standings</span>
-          </Link>
-        </div>
+        {view === "scoreboard" ?
+          <div></div> :
+          <div className="flex-none text-center basis-1/4 text-base font-semibold">
+            <Link href={"/" + data.season.path}>
+              <span className="hover:text-orange-500 cursor-pointer">Standings</span>
+            </Link>
+          </div>
+        }
       </header>
       <main className="flex-1 flex flex-wrap">
         {loaded(data, view, params)}
