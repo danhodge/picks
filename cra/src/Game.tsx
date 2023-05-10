@@ -59,14 +59,14 @@ const PickGroup = (props: PickGroupProps) => {
       return diff;
     }
   };
-  const bgColors = ["bg-orange-300", "bg-blue-300"];
-  const bgColor = (props.team === pickVisitor(props.game)) ? bgColors[0] : bgColors[1];
 
-  const rows = Array.from(props.stats.picks.entries()).sort(sorter).map((val: [Participant, number]) => {
+  const rowBg = ["bg-slate-50", "bg-white"];
+  const rows = Array.from(props.stats.picks.entries()).sort(sorter).map((val: [Participant, number], idx: number) => {
     const [participant, points] = val;
+    const rowIdx = Math.floor(idx / 4) % 2;
     return <>
-      <div key={participant.name + "_name"}><Link href={"/" + props.season.path + "/participants/" + participant.id}>{participant.name}</Link></div>
-      <div className="font-thin" key={participant.name + "_points"}>{points}</div>
+      <div className={rowBg[rowIdx]} key={participant.name + "_name"}><Link href={"/" + props.season.path + "/participants/" + participant.id}>{participant.name}</Link></div>
+      <div className={rowBg[rowIdx] + " font-thin"} key={participant.name + "_points"}>{points}</div>
     </>
   });
 
@@ -77,7 +77,7 @@ const PickGroup = (props: PickGroupProps) => {
           {props.team.name} <span className="font-extralight">{props.stats.totalPicks()} picks {props.stats.totalPoints()} points</span>
         </>
       </div>
-      <div className={bgColor + " rounded-lg grid grid-cols-8 gap-2 p-3"}>
+      <div className="bg-slate-50 rounded-lg grid grid-cols-8 gap-y-2 p-3">
         {rows}
       </div>
     </div>

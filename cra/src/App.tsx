@@ -595,6 +595,9 @@ function Shell() {
       <main className="flex-1 flex flex-wrap">
         {loaded(data, view, params)}
       </main>
+      <footer>
+        <div className="p-6" />
+      </footer>
     </div > :
     loading();
 }
