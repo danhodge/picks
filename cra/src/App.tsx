@@ -578,7 +578,7 @@ function Shell() {
 
   const doneLoading = !isLoading && data;
   return doneLoading ?
-    <div className="flex flex-col bg-yellow-100 container min-w-full">
+    <div className="flex flex-col h-screen bg-yellow-100 container min-w-full">
       <header className="bg-yellow-200 container flex flex-row items-center sticky top-0 left-0 min-w-full h-14 px-4">
         <div className="flex-none basis-1/8 text-sm">
           <SeasonSelector seasons={data.seasons} selected={data.season} setSeason={setSeasonLocation} />
@@ -595,9 +595,7 @@ function Shell() {
       <main className="flex-1 flex flex-wrap">
         {loaded(data, view, params)}
       </main>
-      <footer>
-        <div className="p-6" />
-      </footer>
+      <div className="bg-yellow-100 h-screen p-6 flex flex-grow" />
     </div > :
     loading();
 }
