@@ -13,6 +13,7 @@ export interface ResultProps {
 
 export interface PicksProps {
   game: Game;
+  outcome: GameOutcome;
   season: Season;
   picksFor: Map<number, PickStats>;
 }
@@ -45,6 +46,7 @@ export interface PickGroupProps {
   team: Team;
   stats: PickStats;
   game: Game;
+  outcome: GameOutcome;
   season: Season;
 }
 
@@ -60,13 +62,14 @@ const PickGroup = (props: PickGroupProps) => {
     }
   };
 
+  const pointColor = (props.outcome.status !== "completed" || (props.outcome.pointsAwardedTo === props.team)) ? "" : " text-red-400 ";
   const rowBg = ["bg-slate-50", "bg-white"];
   const rows = Array.from(props.stats.picks.entries()).sort(sorter).map((val: [Participant, number], idx: number) => {
     const [participant, points] = val;
     const rowIdx = Math.floor(idx / 4) % 2;
     return <>
       <div className={rowBg[rowIdx]} key={participant.name + "_name"}><Link href={"/" + props.season.path + "/participants/" + participant.id}>{participant.name}</Link></div>
-      <div className={rowBg[rowIdx] + " font-thin"} key={participant.name + "_points"}>{points}</div>
+      <div className={rowBg[rowIdx] + pointColor + " font-thin"} key={participant.name + "_points"}>{points}</div>
     </>
   });
 
@@ -97,7 +100,7 @@ const Picks = (props: PicksProps) => {
     const [id, stats] = val;
     const team = pickHome(props.game).id === id ? pickHome(props.game) : pickVisitor(props.game);
     const groupId = `${props.game.id}_${team.id}`;
-    return <PickGroup key={groupId} team={team} game={props.game} stats={stats} season={props.season} />;
+    return <PickGroup key={groupId} team={team} game={props.game} outcome={props.outcome} stats={stats} season={props.season} />;
   });
 
   return <div>
@@ -184,7 +187,7 @@ const GameComponent = (props: GameProps) => {
         <FinalScore game={props.game} outcome={outcome} /> :
         outcome.status === "forfeited" ? <Forfeit game={props.game} outcome={outcome} /> : <></>}
     </div>
-    <Picks game={props.game} picksFor={picksFor} season={props.data.season} />
+    <Picks game={props.game} outcome={outcome} picksFor={picksFor} season={props.data.season} />
     {/* <div>Total Points Wagered - {props.game.totalPoints} (#{wageredIndex + 1})</div>
     {isCompleted(props.game) ? <div>Total Points Won - {props.game.totalPointsWon} (#{pointsWonIndex + 1})</div> : <div></div>}
     {isCompleted(props.game) ? <div>Winning Pct - {winningPct}%</div> : <div></div>} */}
