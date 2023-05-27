@@ -17,7 +17,20 @@ class Deploy
     end
 
     manifest.each do |key, path|
-      client.put_object(bucket: bucket_name, key: key, body: File.read(path))
+      args = {
+        bucket: bucket_name, 
+        key: key, 
+        body: File.read(path)
+      }
+      args[:content_type] = "text/html" if path.end_with?(".html")
+      args[:content_type] = "application/json" if path.end_with?(".json")
+      args[:content_type] = "text/css" if path.end_with?(".css")
+      args[:content_type] = "application/javascript" if path.end_with?(".js")
+      args[:content_type] = "text/plain" if path.end_with?(".txt")
+      args[:content_type] = "image/png" if path.end_with?(".png")
+      args[:content_type] = "image/x-icon" if path.end_with?(".ico")
+      
+      client.put_object(**args)
     end
   end
 
@@ -70,7 +83,7 @@ class Deploy
         "Version" => "2012-10-17",
         "Statement" => [
           {
-            "Sid" => "AddPerm",
+            "Sid" => "PublicReadGetObject",
             "Effect" => "Allow",
             "Principal" => "*",
             "Action" => "s3:GetObject",
