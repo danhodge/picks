@@ -3,8 +3,11 @@ class Deploy
     @client = client
   end
 
-  def deploy_site(bucket_name)
+  def provision(bucket_name)
     find_or_create_bucket!(bucket_name)
+  end
+  
+  def deploy_site(bucket_name)
     sync_files(bucket_name, File.expand_path("../../../cra/build", __FILE__))
   end
 
