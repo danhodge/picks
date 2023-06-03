@@ -6,7 +6,7 @@ import { TemplateExpression, textChangeRangeIsUnchanged } from 'typescript';
 import './App.css';
 import GameComponent from './Game';
 import { Scoreboard } from './Scoreboard';
-import { DefaultParams, Link, Redirect, Route, Switch, useLocation, useRoute } from "wouter";
+import { DefaultParams, Link, Redirect, Route, Switch, useLocation, useLocationProperty, useRoute } from "wouter";
 import { ParticipantComponent } from './Participant';
 import { SeasonSelector } from './SeasonSelector';
 
@@ -79,17 +79,19 @@ export interface Score {
   losses: number;
 }
 
+export interface Season {
+  path: string;
+  name: string;
+  resultsUrl: string;
+  participantsUrl: string;
+}
+
 export interface Data {
   seasons: Array<Season>;
   season: Season;
   games: Map<number, Game>;
   participants: Map<number, Participant>;
   results: Map<number, GameOutcome>;
-}
-
-export interface Season {
-  path: string;
-  name: string;
 }
 
 const unknownGame = () => {
@@ -136,7 +138,12 @@ const loadGame = (data: any, id: number, teams: Map<number, Team>) => {
 const loadSeasons = (data: any) => {
   var seasons = new Array<Season>();
   for (const season of data) {
-    seasons.push({ path: season.path, name: season.name });
+    seasons.push({
+      path: season.path,
+      name: season.name,
+      resultsUrl: `https://danhodge-cfb.s3.amazonaws.com/development/${season.path}/results.json`,
+      participantsUrl: `https://danhodge-cfb.s3.amazonaws.com/development/${season.path}/participants.json`
+    });
   }
 
   return seasons;
@@ -483,16 +490,16 @@ const queryClient = new QueryClient({
 [{path: "2021", name: "2021-22"}, {path: "2021a", name: "2021-22 test"}]
 */
 
-const fetchResults = async (season: string | undefined) => {
+const fetchResults = async (season: string | undefined, seasonsUrl: string) => {
   // TODO: handle non-2xx response codes gracefully
-  return fetch("https://danhodge-cfb.s3.amazonaws.com/development/seasons.json")
+  return fetch(seasonsUrl)
     .then((result) => result.json())
     .then(async (seasons) => {
       const seasonData = loadSeasons(await seasons);
       if (seasonData.length === 0) {
         return {
           seasons: seasonData,
-          season: { name: "U", path: "U" },
+          season: { name: "U", path: "U", resultsUrl: "", participantsUrl: "" },
           games: new Map<number, Game>(),
           results: new Map<number, GameOutcome>(),
           participants: new Map<number, Participant>(),
@@ -500,9 +507,8 @@ const fetchResults = async (season: string | undefined) => {
       } else {
         const requestedSeason = seasonData.find((val) => (season !== "unknown") && (val.path === season));
         const actualSeason = (requestedSeason) ? requestedSeason : seasonData[0];
-        const path = actualSeason.path;
-        const resultsUrl = `https://danhodge-cfb.s3.amazonaws.com/development/${path}/results.json`;
-        const participantsUrl = `https://danhodge-cfb.s3.amazonaws.com/development/${path}/participants.json`;
+        const resultsUrl = actualSeason.resultsUrl;
+        const participantsUrl = actualSeason.participantsUrl;
 
         return Promise
           .all([fetch(resultsUrl), fetch(participantsUrl)])
@@ -533,20 +539,27 @@ const fetchResults = async (season: string | undefined) => {
     })
 };
 
-function App() {
+export interface AppProps {
+  seasonsUrl: string;
+}
+
+function App(props: AppProps) {
   return (
     <QueryClientProvider client={queryClient}>
-      <Shell />
+      <Shell seasonsUrl={props.seasonsUrl} />
     </QueryClientProvider>
   );
 }
 
-function Shell() {
+function Shell(props: AppProps) {
   const [isRoot, _] = useRoute("/");
   const [isScoreboard, scoreboardParams] = useRoute("/:season");
   const [isGame, gameParams] = useRoute("/:season/games/:id");
   const [isParticipant, participantParams] = useRoute("/:season/participants/:id");
   const [location, setLocation] = useLocation();
+
+  // TODO: extract season from here
+  const search = window.location.search;
 
   var view = "redirect";
   var params = null;
@@ -563,7 +576,7 @@ function Shell() {
 
   const [season, setSeason] = useState(params ? params.season : "unknown");
 
-  const { data, isLoading, status } = useQuery(["results", season], () => fetchResults(season));
+  const { data, isLoading, status } = useQuery(["results", season], () => fetchResults(season, props.seasonsUrl));
 
   if (view === "redirect") {
     const now = new Date(Date.now());

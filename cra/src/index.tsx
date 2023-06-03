@@ -9,7 +9,7 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <App />
+    <App seasonsUrl='https://danhodge-cfb.s3.amazonaws.com/development/seasons.json' />
   </React.StrictMode>
 );
 
