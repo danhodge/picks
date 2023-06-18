@@ -82,6 +82,7 @@ require 'cbs_games'
 # end
 
 class CBSScores
+  # does not work pre-2017
   def initialize(
         season,
         url_format: 'https://www.cbssports.com/college-football/scoreboard/FBS/%{year}/postseason/%{week}/'

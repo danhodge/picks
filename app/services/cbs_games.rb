@@ -20,10 +20,10 @@ class CBSGames
   attr_reader :games
 
   def extract_data(game_element)
-    rows = game_element.xpath("div/div[contains(@class, 'in-progress-table')]/table/tbody/tr")
+    rows = game_element.xpath("div/div/div[contains(@class, 'in-progress-table')]/table/tbody/tr")
     raise "Expected 2 rows, found: #{rows.size}" unless rows.size == 2
 
-    game_name = game_element.xpath("div/div[contains(@class, 'series-statement')]")[0].text.strip
+    game_name = game_element.xpath("div/div/div[contains(@class, 'series-statement')]")[0].text.strip
 
     visitor = extract_team_data(rows[0])
     home = extract_team_data(rows[1])
@@ -51,7 +51,7 @@ class CBSGames
     cells = element.xpath("td")
     final_score = cells[-1].text.to_i
     intermediate_scores = cells.drop(1).take(cells.size - 2).map { |cell| cell.text.to_i }
-    team_name = cells[0].xpath("a").last.text.strip
+    team_name = cells[0].xpath("div/a").last.text.strip
 
     { team_name: team_name, score: final_score, intermediate_scores: intermediate_scores }    
   end
