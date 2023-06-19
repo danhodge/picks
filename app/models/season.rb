@@ -20,6 +20,12 @@ class Season < ActiveRecord::Base
     Season.where(year: year).first_or_create!
   end
 
+  def in_progress?(now: Time.now)
+    return false if completed?
+
+    now > Date.new(year, 12, 15) && now < Date.new(year + 1, 1, 15)
+  end
+
   def completed?
     games.all?(&:completed?)
   end
