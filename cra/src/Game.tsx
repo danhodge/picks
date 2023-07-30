@@ -204,12 +204,20 @@ const TeamScore = (props: TeamScoreProps) => {
   return (props.outcome?.pointsAwardedTo === props.team) ?
     <>
       <div className="col-span-4 font-semibold">{props.team.name}</div>
-      <div className="font-semibold">{scoreForTeam(props.outcome, props.team) || " unknown"}</div>
+      <div className="font-semibold">{displayScore(scoreForTeam(props.outcome, props.team))}</div>
     </> :
     <>
       <div className="col-span-4">{props.team.name}</div>
-      <div>{scoreForTeam(props.outcome, props.team) || " unknown"}</div>
+      <div>{displayScore(scoreForTeam(props.outcome, props.team))}</div>
     </>;
+}
+
+const displayScore = (val: number | undefined): string => {
+  if (val || val === 0) {
+    return val.toString()
+  } else {
+    return "unknown"
+  }
 }
 
 export default GameComponent;
