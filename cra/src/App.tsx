@@ -141,8 +141,8 @@ const loadSeasons = (data: any) => {
     seasons.push({
       path: season.path,
       name: season.name,
-      resultsUrl: `https://danhodge-cfb.s3.amazonaws.com/development/${season.path}/results.json`,
-      participantsUrl: `https://danhodge-cfb.s3.amazonaws.com/development/${season.path}/participants.json`
+      resultsUrl: season.results_url,
+      participantsUrl: season.participants_url
     });
   }
 
