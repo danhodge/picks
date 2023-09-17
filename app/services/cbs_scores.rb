@@ -1,104 +1,94 @@
 require 'mechanize'
 require 'logger'
 require 'game'
+require 'cbs_games'
 
-class CBSGames
-  def initialize(games_page)
-    @games = games_page.xpath("//div[contains(@class, 'single-score-card')]")
-  end
+# class CBSGames
+#   def initialize(games_page)
+#     @games = games_page.xpath("//div[contains(@class, 'single-score-card')]")
+#   end
 
-  def each_in_progress
-    return enum_for(:each_in_progress) unless block_given?
+#   def each
+#     return enum_for(:each) unless block_given?
 
-    classify_games[:in_progress].each do |game_element|
-      yield extract_data(game_element)
-    end
-  end
+#     classify_games.each do |game_element|
+#       yield extract_data(game_element)
+#     end
+#   end
 
-  def each_completed
-    return enum_for(:each_completed) unless block_given?
+#   private
 
-    classify_games[:postgame].each do |game_element|
-      yield extract_data(game_element)
-    end
-  end
+#   attr_reader :games
 
-  private
+#   def classify_games
+#     games.each do |game|
+#       id = game.attributes["id"]
+#       next unless id && id.value =~ /game-\d+/
 
-  attr_reader :games
+#       if !game.xpath("div/div/div[contains(@class, 'pregame')]").empty?
+#         groups[:pregame] << game
+#       elsif !(postgame = game.xpath("div/div/div[contains(@class, 'postgame')]")).empty?
+#         if postgame.text.downcase.start_with?("final")
+#           groups[:postgame] << game
+#         else
+#           groups[:cancelled] << game
+#         end
+#       else
+#         groups[:in_progress] << game
+#       end
+#     end
 
-  def classify_games
-    groups = {
-      in_progress: [],
-      pregame: [],
-      postgame: []
-    }
+#     groups
+#   end
 
-    games.each do |game|
-      id = game.attributes["id"]
-      next unless id && id.value =~ /game-\d+/
+#   def extract_data(game_element)
+#     rows = game_element.xpath("div/div[contains(@class, 'in-progress-table')]/table/tbody/tr")
+#     raise "Expected 2 rows, found: #{rows.size}" unless rows.size == 2
 
-      if !game.xpath("div/div/div[contains(@class, 'pregame')]").empty?
-        groups[:pregame] << game
-      elsif !game.xpath("div/div/div[contains(@class, 'postgame')]").empty?
-        groups[:postgame] << game
-      else
-        groups[:in_progress] << game
-      end
-    end
+#     game_name = game_element.xpath("div/div[contains(@class, 'series-statement')]")[0].text.strip
 
-    groups
-  end
+#     visitor = extract_team_data(rows[0])
+#     home = extract_team_data(rows[1])
+#     status = parse_game_status(game_element, game_name)
 
-  def extract_data(game_element)
-    rows = game_element.xpath("div/div[contains(@class, 'in-progress-table')]/table/tbody/tr")
-    raise "Expected 2 rows, found: #{rows.size}" unless rows.size == 2
+#     { game_name: game_name, visitor: visitor, home: home, status: status }
+#   end
 
-    game_name = game_element.xpath("div/div[contains(@class, 'series-statement')]")[0].text.strip
+#   def extract_team_data(element)
+#     cells = element.xpath("td")
+#     final_score = cells[-1].text.to_i
+#     intermediate_scores = cells.drop(1).take(cells.size - 2).map { |cell| cell.text.to_i }
+#     team_name = cells[0].xpath("a").last.text.strip
 
-    visitor = extract_team_data(rows[0])
-    home = extract_team_data(rows[1])
-    status = parse_game_status(game_element, game_name)
+#     { team_name: team_name, score: final_score, intermediate_scores: intermediate_scores }    
+#   end
 
-    { game_name: game_name, visitor: visitor, home: home, status: status }
-  end
+#   def parse_game_status(game_element, game_name)
+#     status = game_element.xpath("div/div/div[contains(@class, 'game-status')]")[0].text.strip
+#     raise "No status found for game: #{game_name}" unless status
 
-  def extract_team_data(element)
-    cells = element.xpath("td")
-    final_score = cells[-1].text.to_i
-    intermediate_scores = cells.drop(1).take(cells.size - 2).map { |cell| cell.text.to_i }
-    team_name = cells[0].xpath("a").last.text.strip
-
-    { team_name: team_name, score: final_score, intermediate_scores: intermediate_scores }    
-  end
-
-  def parse_game_status(game_element, game_name)
-    status = game_element.xpath("div/div/div[contains(@class, 'game-status')]")[0].text.strip
-    raise "No status found for game: #{game_name}" unless status
-
-    if status.downcase == "final"
-      { quarter: "final" }
-    elsif status.downcase == "halftime"
-      { quarter: "halftime" }
-    elsif (match = /(\d)\w{2}\s+(\d{1,2}:\d{2})/.match(status))
-      { quarter: match[1], remaining: match[2] }
-    else
-      { quarter: status }
-    end
-  end
-end
+#     if status.downcase == "final"
+#       { quarter: "final" }
+#     elsif status.downcase == "halftime"
+#       { quarter: "halftime" }
+#     elsif status.downcase == "cancelled"
+#       { quarter: "cancelled" }
+#     elsif (match = /(\d)\w{2}\s+(\d{1,2}:\d{2})/.match(status))
+#       { quarter: match[1], remaining: match[2] }
+#     else
+#       { quarter: status }
+#     end
+#   end
+# end
 
 class CBSScores
+  # does not work pre-2017
   def initialize(
         season,
-        urls: [
-          'https://www.cbssports.com/college-football/scoreboard/FBS/2022/postseason/16/',
-          'https://www.cbssports.com/college-football/scoreboard/FBS/2022/postseason/17/',
-          'https://www.cbssports.com/college-football/scoreboard/FBS/2022/postseason/18/'
-        ]
+        url_format: 'https://www.cbssports.com/college-football/scoreboard/FBS/%{year}/postseason/%{week}/'
       )
     @games = Game.games_for_season(season)
-    @urls = urls
+    @urls = (16..20).map { |week| url_format % { year: season.year, week: week } }
     @logger = Logger.new(STDOUT)
     @agent = Mechanize.new do |mechanize|
       mechanize.user_agent = 'Mac Safari'
@@ -106,13 +96,51 @@ class CBSScores
     end
   end
 
+  def check_score(game)
+    game_status = @game_statuses.find do |status| 
+      Bowl.normalize_name(status.game_name, season: game.season) == game.name 
+    end
+    
+    if game_status
+      normalized_visitor = Team.normalize_name(game_status.visitor_name)
+      normalized_home = Team.normalize_name(game_status.home_name)
+
+      # handles situations where the reported home/visitor assignment doesn't match how it was picked
+      if (normalized_visitor != game.visitor.name && normalized_home == game.visitor.name) || 
+        (normalized_home != game.home.name && normalized_visitor == game.home.name) 
+        game_status.swap_teams!
+        prev_visitor = normalized_visitor
+        normalized_visitor = normalized_home
+        normalized_home = prev_visitor
+      end
+
+      visitor = game.teams.find { |team| team.name == normalized_visitor }
+      home = game.teams.find { |team| team.name == normalized_home }
+
+      if !visitor
+        game_status.status = "visiting_team_mismatch"
+      end
+
+      if !home
+        game_status.status = "home_team_mismatch"
+      end
+
+      game_status
+    else
+      game_status = GameStatus.new(game.name, game.visitor.name, game.home.name)
+      game_status.status = "missing"
+      game_status
+    end
+  end
+
   def scrape
-    urls.reduce([[], []]) do |(in_progress, completed), url|
+    @game_statuses = scrape_statuses
+  end
+
+  def scrape_statuses
+    urls.reduce([]) do |memo, url|
       cbs_games = CBSGames.new(agent.get(url))
-      [
-        in_progress + cbs_games.each_in_progress.map(&method(:safe_score)).compact, 
-        completed + cbs_games.each_completed.map(&method(:safe_score)).compact
-      ]
+      memo + cbs_games.each.to_a
     end
   end
 
@@ -120,29 +148,40 @@ class CBSScores
 
   attr_reader :games, :logger, :agent, :urls
 
-  def safe_score(result, no_status: false)
-    score(result, no_status: false)
-  rescue StandardError => ex
-    logger.error "Error extracting score: #{ex.message}\n#{ex.backtrace.join("\n")}"
-    nil
+  def season
+    games.first.season
   end
 
-  def score(result, no_status: false)
-    game_record = games.find { |g| g.bowl.name == Bowl.normalize_name(result[:game_name].split(",").first) }
-    raise "No game found for: #{result[:game_name]}" unless game_record
+  # def safe_score(result, no_status: false)
+  #   score(result, no_status: false)
+  # rescue StandardError => ex
+  #   logger.error "Error extracting score: #{ex.message}\n#{ex.backtrace.join("\n")}"
+  #   nil
+  # end
 
-    visitor = game_record.teams.find { |t| t.name == Team.normalize_name(result[:visitor][:team_name]) }
-    raise "No team found for: #{result[:visitor][:team_name]}" unless visitor
-    home = game_record.teams.find { |t| t.name == Team.normalize_name(result[:home][:team_name]) }
-    raise "No team found for: #{result[:home][:team_name]}" unless home
+  # def score(result, no_status: false)
+  #   game_record = games.find { |g| g.bowl.name == Bowl.normalize_name(result[:game_name].split(",").first, season: season) }
+  #   raise "No game found for: #{result[:game_name]}" unless game_record
 
-    new_result = {
-      game: game_record,
-      visitor: result[:visitor].merge(team: visitor),
-      home: result[:home].merge(team: home),
-    }
-    new_result[:status] = result[:status] unless no_status
+  #   if result[:status][:quarter] == "cancelled"
+  #     {
+  #       game: game_record,
+  #       status: "cancelled"
+  #     }
+  #   else
+  #     visitor = game_record.teams.find { |t| t.name == Team.normalize_name(result[:visitor][:team_name]) }
+  #     raise "No team found for: #{result[:visitor][:team_name]}" unless visitor
+  #     home = game_record.teams.find { |t| t.name == Team.normalize_name(result[:home][:team_name]) }
+  #     raise "No team found for: #{result[:home][:team_name]}" unless home
 
-    new_result
-  end
+  #     new_result = {
+  #       game: game_record,
+  #       visitor: result[:visitor].merge(team: visitor),
+  #       home: result[:home].merge(team: home),
+  #     }
+  #     new_result[:status] = result[:status] unless no_status
+
+  #     new_result
+  #   end
+  # end
 end

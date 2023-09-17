@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_12_14_132126) do
+ActiveRecord::Schema[7.0].define(version: 2023_02_26_145210) do
   create_table "bowls", force: :cascade do |t|
     t.string "name", null: false
     t.string "city"
@@ -38,10 +38,12 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_14_132126) do
     t.integer "previous_home_team_id"
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
+    t.integer "status", default: 0, null: false
     t.index ["game_id"], name: "index_game_changes_on_game_id"
     t.index ["new_team_id"], name: "index_game_changes_on_new_team_id"
     t.index ["previous_home_team_id"], name: "index_game_changes_on_previous_home_team_id"
     t.index ["previous_visiting_team_id"], name: "index_game_changes_on_previous_visiting_team_id"
+    t.index ["status"], name: "index_game_changes_on_status"
   end
 
   create_table "games", force: :cascade do |t|
@@ -54,7 +56,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_14_132126) do
     t.integer "game_type", default: 1, null: false
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
-    t.integer "game_status", default: 1
+    t.integer "game_status", default: 0, null: false
     t.index ["bowl_id"], name: "index_games_on_bowl_id"
     t.index ["home_team_id"], name: "index_games_on_home_team_id"
     t.index ["season_id", "bowl_id"], name: "index_games_on_season_id_and_bowl_id", unique: true
@@ -81,9 +83,11 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_14_132126) do
     t.integer "points", null: false
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
+    t.integer "status", default: 0, null: false
     t.index ["game_id"], name: "index_picks_on_game_id"
     t.index ["participant_id", "game_id"], name: "index_picks_on_participant_id_and_game_id", unique: true
     t.index ["participant_id"], name: "index_picks_on_participant_id"
+    t.index ["status"], name: "index_picks_on_status"
     t.index ["team_id"], name: "index_picks_on_team_id"
   end
 

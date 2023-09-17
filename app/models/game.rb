@@ -9,10 +9,16 @@ class Game < ActiveRecord::Base
   belongs_to :home, class_name: Team.name, foreign_key: :home_team_id
   has_many :final_scores
   has_many :picks
+  has_many :accepted_game_changes, -> { accepted }, class_name: 'GameChange'
+
+  enum game_status: %i[pending finished cancelled missing visitor_forfeit home_forfeit abandoned]
 
   validates :game_time, presence: true
   validates :game_type, inclusion: { in: [GAME_TYPE_REGULAR, GAME_TYPE_SEMIFINAL, GAME_TYPE_CHAMPIONSHIP] }
+  validates :game_status, inclusion: { in: game_statuses.keys }
   validates :bowl_id, uniqueness: { scope: :season_id }
+
+  delegate :name, to: :bowl, allow_nil: false
 
   def self.games_for_season(season)
     where(season: season).includes(:bowl, { visitor: :records }, { home: :records }, { final_scores: [:game, :team] }).order(:game_time, :id)
@@ -23,7 +29,7 @@ class Game < ActiveRecord::Base
   end
 
   def completed?
-    final_scores.count == 2
+    (final_scores.count == 2 && finished?) || (abandoned? || visitor_forfeit? || home_forfeit?)
   end
 
   def visitor_final_score
@@ -34,6 +40,24 @@ class Game < ActiveRecord::Base
   def home_final_score
     final = final_scores.find { |score| score.team == home }
     final && final.points
+  end
+
+  def game_outcome
+    if home_forfeit? || visitor_forfeit?
+      GameOutcome.forfeited(self)
+    elsif completed? && accepted_game_changes.count == 1
+      GameOutcome.completed_with_change(self)
+    elsif completed? && accepted_game_changes.count == 2
+      GameOutcome.completed_with_changes(self)
+    elsif abandoned?
+      GameOutcome.cancelled
+    elsif completed? && visitor_final_score == home_final_score
+      GameOutcome.tied
+    elsif completed?
+      GameOutcome.completed(self)
+    else
+      GameOutcome.incomplete
+    end
   end
 
   def favored_team
@@ -51,3 +75,4 @@ class Game < ActiveRecord::Base
     point_spread.abs.round(1)
   end
 end
+

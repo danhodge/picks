@@ -9,7 +9,7 @@ class FinalScore < ActiveRecord::Base
 
   def check_consistency
     if team && game && !game.teams.include?(team)
-      errors[:team_id] << "Invalid team (#{team.id}) for game (#{game.id})"
+      errors.add(:team_id, "Invalid team (#{team.id}) for game (#{game.id})")
     end
   end
 end

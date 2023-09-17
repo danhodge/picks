@@ -6,6 +6,7 @@ require 'family_fun_schedule'
 require 'fox_lines'
 require 'update_results'
 require 'update_scores'
+require 'update_seasons'
 
 namespace :scrape do
   task schedule: "db:load_config" do
@@ -24,14 +25,20 @@ namespace :scrape do
     CBSLines.scrape_and_create(Season.current)
   end
 
-  task update_scores: "db:load_config" do
-    UpdateScores.perform(Season.current)
+  task :update_scores, [:season] => "db:load_config" do |_task, args|
+    season = args.key?(:season) ? Season.find_by!(year: args[:season]) : Season.current
+    UpdateScores.perform(season)
   end
 
-  task export_participants: "db:load_config" do
+  task :export_participants, [:season] => "db:load_config" do |_task, args|
+    season = args.key?(:season) ? Season.find_by!(year: args[:season]) : Season.current
     # write partipants to S3
-    ExportParticipants.perform(Season.current)
+    ExportParticipants.perform(season)
     # write results to S3
-    UpdateResults.perform(Season.current)
+    UpdateResults.perform(season)
+  end
+
+  task update_seasons: "db:load_config" do
+    UpdateSeasons.perform()
   end
 end

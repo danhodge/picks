@@ -44,3 +44,18 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+## Deployment
+
+```bash
+npm run build
+cd build
+aws s3 sync . s3://danhodge-picks
+```
+
+## Development & Testing
+
+Scenarios:
+1. production data + production code   -> standard, load code from prod bucket with prod seasons file 
+2. production data + development code  -> load code from local server, uses default prod seasons file
+3. development data + development code -> load code from local server with seasons file override in index.html

@@ -15,15 +15,42 @@ class UpdateScores
   end
 
   def perform
-    update
+    update_games
     UpdateResults.perform(@season)
   end
 
-  def update
-    in_progress, completed = cbs_scores.scrape
+  def update_games(now: Time.now)
+    cbs_scores.scrape
+    games.each do |game|
+      next if game.game_time > (now + 300)
+      status = cbs_scores.check_score(game)
 
-    update_in_progress(in_progress)
-    update_completed(completed)
+      if status.team_mismatch?
+        # record mismatches in a pending state, once approved, new team(s) will be swapped and the results can be applied
+        GameChange.transaction do
+          if status.visiting_team_mismatch?
+            GameChange.where(
+              game: game, 
+              new_team: Team.where(name: Team.normalize_name(status.visitor_name)).first_or_create!, 
+              previous_visiting_team: game.visitor
+            ).first_or_create!
+          end
+          if status.home_team_mismatch?
+            GameChange.where(
+              game: game, 
+              new_team: Team.where(name: Team.normalize_name(status.home_name)).first_or_create!,
+              previous_home_team: game.home
+            ).first_or_create!
+          end
+        end
+      elsif status.missing? && now > (game.game_time + 1.day)
+        update_completed(game, status)
+      elsif status.in_progress?
+        update_in_progress(game, status)
+      elsif status.completed?
+        update_completed(game, status)       
+      end  
+    end
   rescue => ex
     puts "Error scraping scores: #{ex.message} - #{ex.backtrace.join("\n")}"
   end
@@ -32,48 +59,50 @@ class UpdateScores
 
   attr_reader :cbs_scores
 
-  def update_in_progress(in_progress)
-    Score.transaction do
-      in_progress.each do |score|
-        quarter = score[:status][:quarter].gsub(/[^\d]/, "")
-        remaining_secs =
-          if (remaining = score[:status][:remaining])
-            mins, secs = remaining.split(":").map(&:to_i)
-            secs + mins * 60
-          else
-            0
-          end
+  def games
+    @season.games
+  end
 
-        Score.where(
-          game: score[:game],
-          team: score[:visitor][:team],
-          quarter: quarter,
-          time_remaining_seconds: remaining_secs,
-          points: score[:visitor][:score]
-        ).first_or_create!
-        Score.where(
-          game: score[:game],
-          team: score[:home][:team],
-          quarter: quarter,
-          time_remaining_seconds: remaining_secs,
-          points: score[:home][:score]
-        ).first_or_create!
-      end
+  def update_in_progress(game, status)
+    Score.transaction do
+      Score.where(
+        game: game,
+        team: game.teams.find { |team| team.name == Team.normalize_name(status.visitor_name) },
+        quarter: status.quarter,
+        time_remaining_seconds: status.remaining_secs,
+        points: status.visitor_score
+      ).first_or_create!
+      Score.where(
+        game: game,
+        team: game.teams.find { |team| team.name == Team.normalize_name(status.home_name) },
+        quarter: status.quarter,
+        time_remaining_seconds: status.remaining_secs,
+        points: status.home_score
+      ).first_or_create!      
     end
   rescue StandardError => ex
     puts "Error updating in-progress scores: #{ex.message} - #{ex.backtrace.join("\n")}"
   end
 
-  def update_completed(completed)
+  def update_completed(game, status)
     FinalScore.transaction do
-      completed.each do |score|
-        FinalScore.where(game: score[:game], team: score[:visitor][:team]).first_or_create! do |s|
-          s.points = score[:visitor][:score]
+      if status.cancelled? && !game.completed?
+        game.cancelled!
+      elsif status.missing? && !game.completed?
+        game.missing!
+      elsif !status.cancelled? && !status.missing?
+        FinalScore.where(game: game, team: game.teams.find { |team| team.name == Team.normalize_name(status.visitor_name) }).first_or_create! do |s|
+          s.points = status.visitor_score
         end
-        FinalScore.where(game: score[:game], team: score[:home][:team]).first_or_create! do |s|
-          s.points = score[:home][:score]
+        FinalScore.where(game: game, team: game.teams.find { |team| team.name == Team.normalize_name(status.home_name) }).first_or_create! do |s|
+          s.points = status.home_score
         end
-      end
+        game.finished!
+      end     
+
+      outcome = game.game_outcome
+      game.picks.where(team: outcome.points_awarded_to).update_all(status: :correct)
+      game.picks.where.not(team: outcome.points_awarded_to).update_all(status: :incorrect)
     end
   rescue StandardError => ex
     puts "Error updating completed scores: #{ex.message} - #{ex.backtrace.join("\n")}"

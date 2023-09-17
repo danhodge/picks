@@ -13,6 +13,12 @@ Add a Migration
 bundle exec rake db:create_migration NAME=create_table
 ```
 
+Migrate the production DB
+
+```bash
+RACK_ENV=production bundle exec rake db:migrate
+```
+
 Setup (run these tasks in the following order)
 
 Load the CBS sports schedule for the current season into the DB
@@ -69,13 +75,19 @@ Export the participants
 bundle exec rake scrape:family_fun_schedule
 
 # run this to export the participants JSON to S3
-AWS_ACCESS_KEY_ID=<> AWS_SECRET_ACCESS_KEY=<> bundle exec rake scrape:export_participants
+AWS_ACCESS_KEY_ID=<> AWS_SECRET_ACCESS_KEY=<> bundle exec rake scrape:export_participants[year]
 ```
 
 Update the scores
 
 ``` bash
-AWS_ACCESS_KEY_ID=<> AWS_SECRET_ACCESS_KEY=<> bundle exec rake scrape:update_scores
+AWS_ACCESS_KEY_ID=<> AWS_SECRET_ACCESS_KEY=<> bundle exec rake scrape:update_scores[year]
+```
+
+Update the seasons
+
+``` bash
+AWS_PROFILE=<> bundle exec rake scrape:update_seasons
 ```
 
 ### sqlite
