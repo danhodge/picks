@@ -3,7 +3,9 @@ require 'mechanize'
 require 'pry'
 
 class CBSLines
-  def self.scrape_and_create(season, url: "https://www.cbssports.com/college-football/news/college-football-odds-lines-predictions-for-the-2022-23-bowl-season-proven-model-picks-washington-usc/")
+  # search for "college football bowl point spreads"
+  # "https://www.cbssports.com/college-football/news/college-football-odds-lines-predictions-for-the-2022-23-bowl-season-proven-model-picks-washington-usc/")  
+  def self.scrape_and_create(season, url: "https://www.cbssports.com/college-football/news/2023-24-college-football-bowl-season-spread-picks-odds-betting-trends-vegas-expert-reveals-picks/")
     agent = Mechanize.new do |mechanize|
       mechanize.user_agent = 'Mac Safari'
       mechanize.log = Logger.new(STDOUT)
@@ -12,7 +14,7 @@ class CBSLines
     new(season, page: agent.get(url)).scrape_and_create
   end
 
-  GAME_TEAMS_LINE = /(?<game>.+): (?<visitor>.+) vs\. (?<home>.+) \((?<line>[\+-][\d\.]+)(?:, [\d\.]+)?\)/
+  GAME_TEAMS_LINE = /(?<game>.+):[[:space:]](?<visitor>.+)[[:space:]]vs\.[[:space:]](?<home>.+)[[:space:]]\((?<line>[\+-][\d\.]+)(?:, [\d\.]+)?\)/
 
   def initialize(season, file: nil, page: nil)
     raise ArgumentError, "file or page must be specified" unless file || page
@@ -38,7 +40,7 @@ class CBSLines
       elsif cur_date
         if match = GAME_TEAMS_LINE.match(child.text)
           name_tokens = match[:game].split(" ")
-          name_tokens.shift if name_tokens[0] == Season.current.year.to_s || (Season.current.year + 1).to_s
+          name_tokens.shift if [Season.current.year.to_s, (Season.current.year + 1).to_s].include?(name_tokens[0])
 
           results << [
             name_tokens.join(" "),
