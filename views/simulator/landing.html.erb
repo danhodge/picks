@@ -24,7 +24,7 @@ img, div { behavior: url(iepngfix.htc) }
 
 <div id="eform">
 <div id="header">
-<h1 style="font-size: 38px;"><b>FAMILY FUN FOOTBALL  22/23 SEASON</b></h1>	
+<h1 style="font-size: 38px;"><b>FAMILY FUN FOOTBALL  <%= year %> SEASON</b></h1>	
 
 </div>
 <h4 style="color: black; padding: 0px; margin: 0px;">The pigskin prognosticator with the MOST POINTS CORRECT in this fun activity will be the winner.  Total points scored in the Rose Bowl is the tie breaker (nearest to actual). GOOD LUCK</h4>
@@ -33,138 +33,32 @@ img, div { behavior: url(iepngfix.htc) }
 	<tr>
 		<td colspan="2"><p class="tbcen" style="text-align: right;"><b>Bowl:</b></p></td>	
 
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"><b>Bahamas Bowl</b></p></td>
-			<td colspan="2" ><p class="tbcen"><b>Cure Bowl</b></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"><b>Fenway Bowl</b></p></td>
-			<td colspan="2" ><p class="tbcen"><b>Celebration Bowl</b></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"><b>Las Vegas Bowl</b></p></td>
-			<td colspan="2" ><p class="tbcen"><b>LA Bowl</b></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"><b>LendingTree Bowl</b></p></td>
-			<td colspan="2" ><p class="tbcen"><b>New Mexico Bowl</b></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"><b>Frisco Bowl</b></p></td>
-			<td colspan="2" ><p class="tbcen"><b>Myrtle Beach Bowl</b></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"><b>Idaho Potato Bowl</b></p></td>
-			<td colspan="2" ><p class="tbcen"><b>Boca Raton Bowl</b></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"><b>New Orleans Bowl</b></p></td>
-			<td colspan="2" ><p class="tbcen"><b>Armed Forces Bowl</b></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"><b>Independence Bowl</b></p></td>
-			<td colspan="2" ><p class="tbcen"><b>Gasparilla Bowl</b></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"><b>Hawaii Bowl</b></p></td>
-			<td colspan="2" ><p class="tbcen"><b>Quick Lane Bowl</b></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"><b>Camellia Bowl</b></p></td>
-			<td colspan="2" ><p class="tbcen"><b>First Responder Bowl</b></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"><b>Birmingham Bowl</b></p></td>
-			<td colspan="2" ><p class="tbcen"><b>Guaranteed Rate Bowl</b></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"><b>Military Bowl</b></p></td>
-			<td colspan="2" ><p class="tbcen"><b>Liberty Bowl</b></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"><b>Holiday Bowl</b></p></td>
-			<td colspan="2" ><p class="tbcen"><b>Texas Bowl</b></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"><b>Pinstripe Bowl</b></p></td>
-			<td colspan="2" ><p class="tbcen"><b>Cheez-It Bowl</b></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"><b>Alamo Bowl</b></p></td>
-			<td colspan="2" ><p class="tbcen"><b>Dukes Mayo Bowl</b></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"><b>Sun Bowl</b></p></td>
-			<td colspan="2" ><p class="tbcen"><b>Gator Bowl</b></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"><b>Arizona Bowl</b></p></td>
-			<td colspan="2" ><p class="tbcen"><b>Orange Bowl</b></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"><b>Music City Bowl</b></p></td>
-			<td colspan="2" ><p class="tbcen"><b>Sugar Bowl</b></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"><b>Peach Bowl</b></p></td>
-			<td colspan="2" ><p class="tbcen"><b>Fiesta Bowl</b></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"><b>ReliaQuest Bowl</b></p></td>
-			<td colspan="2" ><p class="tbcen"><b>Cotton Bowl</b></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"><b>Citrus Bowl</b></p></td>
-			<td colspan="2" ><p class="tbcen"><b>Rose Bowl</b></p></td>
+      <% games.each_slice(2) do |game1, game2| %>
+
+			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"><b><%= game1.name %></b></p></td>
+			<td colspan="2" ><p class="tbcen"><b><%= game2.name %></b></p></td>
+		
+      <% end %>
 		</tr>
 		<tr>
 			<td colspan="2"><p class="tbcen" style="text-align: right;">Location:</p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"></p></td>
-			<td colspan="2" ><p class="tbcen"></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"></p></td>
-			<td colspan="2" ><p class="tbcen"></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"></p></td>
-			<td colspan="2" ><p class="tbcen"></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"></p></td>
-			<td colspan="2" ><p class="tbcen"></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"></p></td>
-			<td colspan="2" ><p class="tbcen"></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"></p></td>
-			<td colspan="2" ><p class="tbcen"></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"></p></td>
-			<td colspan="2" ><p class="tbcen"></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"></p></td>
-			<td colspan="2" ><p class="tbcen"></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"></p></td>
-			<td colspan="2" ><p class="tbcen"></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"></p></td>
-			<td colspan="2" ><p class="tbcen"></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"></p></td>
-			<td colspan="2" ><p class="tbcen"></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"></p></td>
-			<td colspan="2" ><p class="tbcen"></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"></p></td>
-			<td colspan="2" ><p class="tbcen"></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"></p></td>
-			<td colspan="2" ><p class="tbcen"></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"></p></td>
-			<td colspan="2" ><p class="tbcen"></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"></p></td>
-			<td colspan="2" ><p class="tbcen"></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"></p></td>
-			<td colspan="2" ><p class="tbcen"></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"></p></td>
-			<td colspan="2" ><p class="tbcen"></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"></p></td>
-			<td colspan="2" ><p class="tbcen"></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"></p></td>
-			<td colspan="2" ><p class="tbcen"></p></td>
-			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"></p></td>
-			<td colspan="2" ><p class="tbcen"></p></td>
+
+      <% games.each_slice(2) do |game1, game2| %>
+
+			<td colspan="2" style="background-image: url('images/bgtd.png')"  ><p class="tbcen"><%= "#{game1.bowl.city}, #{game1.bowl.state}" %></p></td>
+			<td colspan="2" ><p class="tbcen"><%= "#{game2.bowl.city}, #{game2.bowl.state}" %></p></td>
+
+      <% end %>
 		</tr>
 		<tr>
 			<td colspan="2"><p class="tbcen" style="text-align: right;">Date:<br/>Time:</p></td>
-			<td colspan="2"  style="background-image: url('images/bgtd.png')"  ><p class="tbcen">Dec. 16<br/><span style="white-space: nowrap;">11:30 am</span></p></td>
-			<td colspan="2"  ><p class="tbcen">Dec. 16<br/><span style="white-space: nowrap;">03:00 pm</span></p></td>
-			<td colspan="2"  style="background-image: url('images/bgtd.png')"  ><p class="tbcen">Dec. 17<br/><span style="white-space: nowrap;">11:00 am</span></p></td>
-			<td colspan="2"  ><p class="tbcen">Dec. 17<br/><span style="white-space: nowrap;">12:00 pm</span></p></td>
-			<td colspan="2"  style="background-image: url('images/bgtd.png')"  ><p class="tbcen">Dec. 17<br/><span style="white-space: nowrap;">02:30 pm</span></p></td>
-			<td colspan="2"  ><p class="tbcen">Dec. 17<br/><span style="white-space: nowrap;">03:30 pm</span></p></td>
-			<td colspan="2"  style="background-image: url('images/bgtd.png')"  ><p class="tbcen">Dec. 17<br/><span style="white-space: nowrap;">05:45 pm</span></p></td>
-			<td colspan="2"  ><p class="tbcen">Dec. 17<br/><span style="white-space: nowrap;">07:30 pm</span></p></td>
-			<td colspan="2"  style="background-image: url('images/bgtd.png')"  ><p class="tbcen">Dec. 17<br/><span style="white-space: nowrap;">09:15 pm</span></p></td>
-			<td colspan="2"  ><p class="tbcen">Dec. 19<br/><span style="white-space: nowrap;">02:30 pm</span></p></td>
-			<td colspan="2"  style="background-image: url('images/bgtd.png')"  ><p class="tbcen">Dec. 20<br/><span style="white-space: nowrap;">03:30 pm</span></p></td>
-			<td colspan="2"  ><p class="tbcen">Dec. 20<br/><span style="white-space: nowrap;">07:30 pm</span></p></td>
-			<td colspan="2"  style="background-image: url('images/bgtd.png')"  ><p class="tbcen">Dec. 21<br/><span style="white-space: nowrap;">09:00 pm</span></p></td>
-			<td colspan="2"  ><p class="tbcen">Dec. 22<br/><span style="white-space: nowrap;">07:30 pm</span></p></td>
-			<td colspan="2"  style="background-image: url('images/bgtd.png')"  ><p class="tbcen">Dec. 23<br/><span style="white-space: nowrap;">03:00 pm</span></p></td>
-			<td colspan="2"  ><p class="tbcen">Dec. 23<br/><span style="white-space: nowrap;">06:30 pm</span></p></td>
-			<td colspan="2"  style="background-image: url('images/bgtd.png')"  ><p class="tbcen">Dec. 24<br/><span style="white-space: nowrap;">08:00 pm</span></p></td>
-			<td colspan="2"  ><p class="tbcen">Dec. 26<br/><span style="white-space: nowrap;">02:30 pm</span></p></td>
-			<td colspan="2"  style="background-image: url('images/bgtd.png')"  ><p class="tbcen">Dec. 27<br/><span style="white-space: nowrap;">12:00 pm</span></p></td>
-			<td colspan="2"  ><p class="tbcen">Dec. 27<br/><span style="white-space: nowrap;">03:15 pm</span></p></td>
-			<td colspan="2"  style="background-image: url('images/bgtd.png')"  ><p class="tbcen">Dec. 27<br/><span style="white-space: nowrap;">06:45 pm</span></p></td>
-			<td colspan="2"  ><p class="tbcen">Dec. 27<br/><span style="white-space: nowrap;">10:15 pm</span></p></td>
-			<td colspan="2"  style="background-image: url('images/bgtd.png')"  ><p class="tbcen">Dec. 28<br/><span style="white-space: nowrap;">02:00 pm</span></p></td>
-			<td colspan="2"  ><p class="tbcen">Dec. 28<br/><span style="white-space: nowrap;">05:30 pm</span></p></td>
-			<td colspan="2"  style="background-image: url('images/bgtd.png')"  ><p class="tbcen">Dec. 28<br/><span style="white-space: nowrap;">08:00 pm</span></p></td>
-			<td colspan="2"  ><p class="tbcen">Dec. 28<br/><span style="white-space: nowrap;">09:00 pm</span></p></td>
-			<td colspan="2"  style="background-image: url('images/bgtd.png')"  ><p class="tbcen">Dec. 29<br/><span style="white-space: nowrap;">02:00 pm</span></p></td>
-			<td colspan="2"  ><p class="tbcen">Dec. 29<br/><span style="white-space: nowrap;">05:30 pm</span></p></td>
-			<td colspan="2"  style="background-image: url('images/bgtd.png')"  ><p class="tbcen">Dec. 29<br/><span style="white-space: nowrap;">09:00 pm</span></p></td>
-			<td colspan="2"  ><p class="tbcen">Dec. 30<br/><span style="white-space: nowrap;">12:00 pm</span></p></td>
-			<td colspan="2"  style="background-image: url('images/bgtd.png')"  ><p class="tbcen">Dec. 30<br/><span style="white-space: nowrap;">02:00 pm</span></p></td>
-			<td colspan="2"  ><p class="tbcen">Dec. 30<br/><span style="white-space: nowrap;">03:30 pm</span></p></td>
-			<td colspan="2"  style="background-image: url('images/bgtd.png')"  ><p class="tbcen">Dec. 30<br/><span style="white-space: nowrap;">04:30 pm</span></p></td>
-			<td colspan="2"  ><p class="tbcen">Dec. 30<br/><span style="white-space: nowrap;">08:00 pm</span></p></td>
-			<td colspan="2"  style="background-image: url('images/bgtd.png')"  ><p class="tbcen">Dec. 31<br/><span style="white-space: nowrap;">12:00 pm</span></p></td>
-			<td colspan="2"  ><p class="tbcen">Dec. 31<br/><span style="white-space: nowrap;">12:15 pm</span></p></td>
-			<td colspan="2"  style="background-image: url('images/bgtd.png')"  ><p class="tbcen">Dec. 31<br/><span style="white-space: nowrap;">02:00 pm</span></p></td>
-			<td colspan="2"  ><p class="tbcen">Dec. 31<br/><span style="white-space: nowrap;">04:00 pm</span></p></td>
-			<td colspan="2"  style="background-image: url('images/bgtd.png')"  ><p class="tbcen">Jan. 02<br/><span style="white-space: nowrap;">12:00 pm</span></p></td>
-			<td colspan="2"  ><p class="tbcen">Jan. 02<br/><span style="white-space: nowrap;">01:00 pm</span></p></td>
-			<td colspan="2"  style="background-image: url('images/bgtd.png')"  ><p class="tbcen">Jan. 02<br/><span style="white-space: nowrap;">01:00 pm</span></p></td>
-			<td colspan="2"  ><p class="tbcen">Jan. 02<br/><span style="white-space: nowrap;">05:00 pm</span></p></td>
+      <!-- Jan.02    05:00 pm -->
+      <% games.each_slice(2) do |game1, game2| %>
+
+			<td colspan="2"  style="background-image: url('images/bgtd.png')"  ><p class="tbcen"><%= game1.game_time %><br/><span style="white-space: nowrap;"><%= game1.game_time %></span></p></td>
+			<td colspan="2"  ><p class="tbcen"><%= game2.game_time %><br/><span style="white-space: nowrap;"><%= game2.game_time %></span></p></td>
+
+      <% end %>
 		</tr>
 		<tr>
 			<td colspan="2"><p class="tbcen" style="text-align: right;">Channel:</p></td>
@@ -300,90 +194,15 @@ img, div { behavior: url(iepngfix.htc) }
 		</tr>
 		<tr>
 			<td colspan="2"><p class="tbcen" style="text-align: right;">Teams:</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Miami (Ohio)</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >UAB</p></td>
-			<td><p class="tbcen" >Troy</p></td>
-			<td><p class="tbcen" >UTSA</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Cincinnati</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Louisville</p></td>
-			<td><p class="tbcen" >Jackson State</p></td>
-			<td><p class="tbcen" >NC Central</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Oregon State</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Florida</p></td>
-			<td><p class="tbcen" >Washington State</p></td>
-			<td><p class="tbcen" >Fresno State</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Rice</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Southern Mississippi</p></td>
-			<td><p class="tbcen" >SMU</p></td>
-			<td><p class="tbcen" >BYU</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Boise State</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >North Texas</p></td>
-			<td><p class="tbcen" >Marshall</p></td>
-			<td><p class="tbcen" >UConn</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Eastern Michigan</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >San Jose State</p></td>
-			<td><p class="tbcen" >Liberty</p></td>
-			<td><p class="tbcen" >Toledo</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >South Alabama</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Western Kentucky</p></td>
-			<td><p class="tbcen" >Baylor</p></td>
-			<td><p class="tbcen" >Air Force</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Houston</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Louisiana Lafayette</p></td>
-			<td><p class="tbcen" >Wake Forest</p></td>
-			<td><p class="tbcen" >Missouri</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Middle Tennessee State</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >San Diego State</p></td>
-			<td><p class="tbcen" >Bowling Green</p></td>
-			<td><p class="tbcen" >New Mexico State</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Buffalo</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Georgia Southern</p></td>
-			<td><p class="tbcen" >Memphis</p></td>
-			<td><p class="tbcen" >Utah State</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Coastal Carolina</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >East Carolina</p></td>
-			<td><p class="tbcen" >Oklahoma State</p></td>
-			<td><p class="tbcen" >Wisconsin</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Duke</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >UCF</p></td>
-			<td><p class="tbcen" >Arkansas</p></td>
-			<td><p class="tbcen" >Kansas</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Oregon</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >North Carolina</p></td>
-			<td><p class="tbcen" >Texas Tech</p></td>
-			<td><p class="tbcen" >Ole Miss</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Minnesota</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Syracuse</p></td>
-			<td><p class="tbcen" >Florida State</p></td>
-			<td><p class="tbcen" >Oklahoma</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Washington</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Texas</p></td>
-			<td><p class="tbcen" >NC State</p></td>
-			<td><p class="tbcen" >Maryland</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >UCLA</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Pitt</p></td>
-			<td><p class="tbcen" >South Carolina</p></td>
-			<td><p class="tbcen" >Notre Dame</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Ohio</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Wyoming</p></td>
-			<td><p class="tbcen" >Tennessee</p></td>
-			<td><p class="tbcen" >Clemson</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Iowa</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Kentucky</p></td>
-			<td><p class="tbcen" >Alabama</p></td>
-			<td><p class="tbcen" >Kansas State</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Georgia</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Ohio State</p></td>
-			<td><p class="tbcen" >Michigan</p></td>
-			<td><p class="tbcen" >TCU</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Mississippi State</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Illinois</p></td>
-			<td><p class="tbcen" >USC</p></td>
-			<td><p class="tbcen" >Tulane</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >LSU</p></td>
-			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" >Purdue</p></td>
-			<td><p class="tbcen" >Utah</p></td>
-			<td><p class="tbcen" >Penn State</p></td>
+
+      <% games.each_slice(2) do |game1, game2| %>
+
+			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" ><%= game1.visitor.name %></p></td>
+			<td style="background-image: url('images/bgtd.png')" ><p class="tbcen" ><%= game1.home.name %></p></td>
+			<td><p class="tbcen" ><%= game2.visitor.name %></p></td>
+			<td><p class="tbcen" ><%= game2.home.name %></p></td>
+
+      <% end %>
 		</tr>
 		<tr>
 			<td colspan="2"><p class="tbcen" style="text-align: right;">Record:</p></td>
