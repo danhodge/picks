@@ -28,17 +28,20 @@ class Team < ActiveRecord::Base
     "Middle Tennessee" => "Middle Tennessee State",
     "Miami FL" => "Miami (FL)",
     "Miami-OH" => "Miami (OH)",
+    "Miami" => "Miami (FL)",
     "MTSU" => "Middle Tennessee State",
     "Middle Tenn." => "Middle Tennessee State",
     "C. Carolina" => "Coastal Carolina",
     "N. Illinois" => "Northern Illinois",
     "App. State" => "Appalachian State",
+    "App State" => "Appalachian State",
     "NIU" => "Northern Illinois",
     "ECU" => "East Carolina",
     "UNC" => "North Carolina",
     "Pitt" => "Pittsburgh",
     "So. Miss" => "Southern Miss",
-    "C. Michigan" => "Central Michigan"
+    "C. Michigan" => "Central Michigan",
+    "Cal" => "California"
   }.freeze
 
   REVERSE_ABBREVIATIONS = {
@@ -53,7 +56,8 @@ class Team < ActiveRecord::Base
     "Mississippi" => "Ole Miss",
     "Miami Florida" => "Miami (FL)",
     "Miami Ohio" => "Miami (OH)",
-    "Southern Mississippi" => "Southern Miss"
+    "Southern Mississippi" => "Southern Miss",
+    "North Carolina State" => "NC State"
   }.freeze
 
   STATES = {
