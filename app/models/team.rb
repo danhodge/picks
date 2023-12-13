@@ -57,7 +57,8 @@ class Team < ActiveRecord::Base
     "Miami Florida" => "Miami (FL)",
     "Miami Ohio" => "Miami (OH)",
     "Southern Mississippi" => "Southern Miss",
-    "North Carolina State" => "NC State"
+    "North Carolina State" => "NC State",
+    "San José State" => "San Jose State"
   }.freeze
 
   STATES = {

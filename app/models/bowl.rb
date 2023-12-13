@@ -31,7 +31,7 @@ class Bowl < ActiveRecord::Base
       "Camellia"
     elsif normalized == "First Responders"
       "First Responder"
-    elsif normalized == "Taxslayer" || normalized == "Tax Slayer"
+    elsif normalized == "Taxslayer" || normalized == "Tax Slayer" || normalized == "TaxSlayer Gator"
       "TaxSlayer"
     elsif normalized == "Gator" && season.year == 2021
       # note: TaxSlayer & Gator Bowl are the same thing
@@ -61,23 +61,34 @@ class Bowl < ActiveRecord::Base
     tokens = name.split(" ")
     if (season.year < 2014) && ((tokens[0] == "Chick-fil-A")  || (tokens.take(2) == %w(Capital One)))
       # do not strip the sponsor prior to 2014
-    elsif %w(AFR Gildan AutoNation Marmot SDCCU Popeyes Hyundai Zaxby FAM Chick-fil-A Goodyear BW3 Allstate AutoZone Valero).include?(tokens[0])
+    elsif %w(AFR Gildan AutoNation Marmot SDCCU Popeyes Hyundai Zaxby FAM Chick-fil-A Goodyear BW3 Allstate AutoZone Valero TransPerfect Isleta Cricket EasyPost SERVPRO Cheez-It TaxAct Vrbo Wasabi 76 DIRECTV RoofClaim.com).include?(tokens[0])
       tokens.shift
     elsif (season.year < 2017) && (tokens.take(2) == %w(Camping World))
       tokens.shift(2)
-    elsif tokens.take(3) == %w(Nova Home Loans)
+    elsif [
+      %w(Nova Home Loans),
+      %w(Avocados From Mexico),
+      %w(Bad Boy Mowers),
+      %w(Union Home Mortgage)
+    ].include?(tokens.take(3))
       tokens.shift(3)
     elsif [
       %w(Royal Purple),
       %w(Raycom Media),
       %w(RL Carriers),
+      %w(R+L Carriers),
       %w(New Era),
       %w(Lockheed Martin),
       %w(AdoCare V100),
       %w(Capital One),
       %w(Battle Frog),
       %w(Motel 6),
-      %w(Jimmy Kimmel)
+      %w(Jimmy Kimmel),
+      %w(Barstool Sports),
+      %w(Radiance Technologies),
+      %w(Starco Brands),
+      %w(Scooter's Coffee),
+      %w(SRS Distribution)
     ].include?(tokens.take(2))
       tokens.shift(2)
     end
