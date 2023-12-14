@@ -66,7 +66,7 @@ class CBSSchedule
   def scrape
     page = agent.get(url)
     tables = page.search("//table")
-    tables.flat_map.with_index do |table, i|
+    results = tables.flat_map.with_index do |table, i|
       table.search("tr").drop(1).map do |row|
         date, game, time, matchup = row.search("td")
 
@@ -82,19 +82,33 @@ class CBSSchedule
         end
       end.compact
     end
+
+    if season.year == 2023
+      championship = results.find { |game| game[-1] == Game::GAME_TYPE_CHAMPIONSHIP } 
+      semis = results.select { |game| game[-1] == Game::GAME_TYPE_SEMIFINAL }.sort_by { |game| game[-2] }
+
+      championship[3] = { name: semis[0][3..4].map { |team| team[:name] }, bowl: semis[0][0] }
+      championship[4] = { name: semis[1][3..4].map { |team| team[:name] }, bowl: semis[1][0] }
+    end
+
+    # ensure that the championship comes last so it can reference the semifinals by id
+    results.sort_by { |game| game[-1] }
   end
 
   def scrape_and_create
     Game.transaction do
       scrape.map do |game_name, city, state, visitor, home, game_time, game_type|
-        next if game_type == Game::GAME_TYPE_CHAMPIONSHIP
+        next if game_type == Game::GAME_TYPE_CHAMPIONSHIP && season.year != 2023
 
         bowl = Bowl.where(name: Bowl.normalize_name(game_name)).first_or_create! do |b|
           b.city = city
           b.state = state
         end
 
-        begin
+        game = Game.where(season: season, bowl: bowl).first_or_initialize
+        game.game_type = game_type
+        game.game_time = game_time
+
         if game_type != Game::GAME_TYPE_CHAMPIONSHIP
           visiting_team = Team.where(name: Team.normalize_name(visitor[:name])).first_or_create!
           Record.where(season: season, team: visiting_team).update!(ranking: visitor[:ranking]) if visitor[:ranking]
@@ -102,20 +116,18 @@ class CBSSchedule
           home_team = Team.where(name: Team.normalize_name(home[:name])).first_or_create!
           Record.where(season: season, team: home_team).update!(ranking: home[:ranking]) if home[:ranking]
 
-          # TODO: how to create championship game?
-          game = Game.where(season: season, bowl: bowl).first_or_create! do |g|
-            g.visitor = visiting_team
-            g.home = home_team
-            g.game_time = game_time
-            g.game_type = game_type
-          end
+          game.visitor = visiting_team
+          game.home = home_team
           binding.pry if game.visitor != visiting_team || game.home != home_team
+        else
+          visiting_team = Team.placeholder!(Game.includes(:bowl).find_by!(season: season, bowls: { name: visitor[:bowl] }))
+          home_team = Team.placeholder!(Game.includes(:bowl).find_by!(season: season, bowls: { name: home[:bowl] }))
+          game.visitor = visiting_team
+          game.home = home_team
+        end
 
-          puts "Created game: #{game.attributes}"
-        end
-        rescue => ex
-          binding.pry
-        end
+        game.save!
+        puts "Created game: #{game.attributes}"
       end
     end
   end

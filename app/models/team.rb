@@ -1,7 +1,11 @@
 class Team < ActiveRecord::Base
   has_many :records
 
+  enum team_type: %i[regular placeholder]
+
   validates :name, presence: true
+  validates :team_type, inclusion: { in: team_types.keys }
+  validates :source_game_id, presence: true, if: -> { placeholder? }
 
   PREFIXES = {
     "C." => "Central",
@@ -65,6 +69,12 @@ class Team < ActiveRecord::Base
     "Ohio" => "OH",
     "Fla." => "FL"
   }.freeze
+
+  def self.placeholder!(game)
+    Team.where(team_type: :placeholder, source_game_id: game.id).first_or_create! do |team|
+      team.name = "Winner of the #{game.season.name} #{game.bowl.name} Bowl"
+    end
+  end
 
   def self.normalize_name(name)
     tokens = name.split(" ")
