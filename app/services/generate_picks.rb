@@ -44,7 +44,7 @@ class GeneratePicks
     games_by_name = Game.games_for_season(season).map { |game| [game.bowl.name, game] }.to_h
     best[1].map do |choice, confidence|
       game = games_by_name.fetch(choice.game)
-      team = [game.visitor, game.home].find { |t| t.name == choice.team }
+      team = [game.visitor, game.home].find { |t| t.display_name == choice.team }
 
       [game, team, confidence]
     end

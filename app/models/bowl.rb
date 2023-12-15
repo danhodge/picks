@@ -31,11 +31,13 @@ class Bowl < ActiveRecord::Base
       "Camellia"
     elsif normalized == "First Responders"
       "First Responder"
-    elsif normalized == "Taxslayer" || normalized == "Tax Slayer" || normalized == "TaxSlayer Gator"
+    elsif normalized == "Taxslayer" || normalized == "Tax Slayer"
       "TaxSlayer"
     elsif normalized == "Gator" && season.year == 2021
       # note: TaxSlayer & Gator Bowl are the same thing
       "TaxSlayer"
+    elsif normalized == "TaxSlayer Gator" && season.year == 2023
+      "Gator"
     elsif normalized == "St. Pete"
       "St. Petersburg"
     elsif normalized == "Go Daddy"
@@ -44,7 +46,7 @@ class Bowl < ActiveRecord::Base
       "Armed Forces"
     elsif normalized == "Dukes Mayo"
       "Duke's Mayo"
-    elsif normalized == "Tony the Tiger"
+    elsif normalized == "Tony the Tiger" || normalized == "Tony the Tiger Sun"
       "Sun"
     elsif normalized == "Frisco Football Classic"
       "Frisco Classic"
@@ -52,6 +54,8 @@ class Bowl < ActiveRecord::Base
       "L.A."
     elsif normalized == "Hawai'i"
       "Hawaii"
+    elsif normalized == "CFP National Championship" && season.year == 2023
+      "National Championship"
     else
       normalized
     end

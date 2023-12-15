@@ -4,6 +4,7 @@ require 'bowl'
 require 'team'
 require 'game'
 require 'enter_picks'
+require 'espn_picks'
 require 'generate_picks'
 
 namespace :picks do
@@ -16,9 +17,9 @@ namespace :picks do
           game.game_time.getlocal('-05:00').to_date,
           game.bowl.name,
           [game.bowl.city, game.bowl.state].join(", "),
-          game.visitor.name,
-          game.home.name,
-          game.favored_team.name,
+          game.visitor.display_name,
+          game.home.display_name,
+          game.favored_team.display_name,
           game.abs_point_spread,
           "",
           ""
@@ -52,20 +53,20 @@ namespace :picks do
         # choose the favorite unless random is more thand std_dev_cutoff from the mean
         choice =
           if random.next.abs < std_dev_cutoff
-            game.favored_team.name
+            game.favored_team.display_name
           elsif game.home.name != game.favored_team.name
-            game.home.name
+            game.home.display_name
           else
-            game.visitor.name
+            game.visitor.display_name
           end
 
         csv << [
           game.game_time.getlocal('-05:00').to_date,
           game.bowl.name,
           [game.bowl.city, game.bowl.state].join(", "),
-          game.visitor.name,
-          game.home.name,
-          game.favored_team.name,
+          game.visitor.display_name,
+          game.home.display_name,
+          game.favored_team.display_name,
           game.abs_point_spread,
           choice,
           adjustment.round(1)
@@ -85,5 +86,13 @@ namespace :picks do
     picks = GeneratePicks.new(Season.current, File.read(args[:csv_path])).compute
     enter = EnterPicks.new(user: user, password: args[:password])
     enter.submit_picks(picks, Integer(args[:tie_breaker]))
+  end
+
+  task :generate_espn, [:csv_path, :espn_path, :tie_breaker] => "db:load_config" do |_task, args|
+    raise ArgumentError, "csv_path must be provided" unless args[:csv_path]
+    raise ArgumentError, "espn_path must be provided" unless args[:espn_path]
+    raise ArgumentError, "tie breaker must be provided" unless args[:tie_breaker]
+    
+    ESPNPicks.generate(args[:csv_path], args[:espn_path], args[:tie_breaker])
   end
 end

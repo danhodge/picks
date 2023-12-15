@@ -7,6 +7,8 @@ class Team < ActiveRecord::Base
   validates :team_type, inclusion: { in: team_types.keys }
   validates :source_game_id, presence: true, if: -> { placeholder? }
 
+  belongs_to :winner_of, class_name: 'Game', foreign_key: :source_game_id
+
   PREFIXES = {
     "C." => "Central",
     "N." => "North",
@@ -45,7 +47,12 @@ class Team < ActiveRecord::Base
     "Pitt" => "Pittsburgh",
     "So. Miss" => "Southern Miss",
     "C. Michigan" => "Central Michigan",
-    "Cal" => "California"
+    "Cal" => "California",
+    "USF" => "South Florida",
+    "WASH" => "Washington",
+    "TEX" => "Texas",
+    "MICH" => "Michigan",
+    "ALA" => "Alabama"
   }.freeze
 
   REVERSE_ABBREVIATIONS = {
@@ -116,5 +123,13 @@ class Team < ActiveRecord::Base
 
   def record(season = Season.current)
     records.where(season: season).first
+  end
+
+  def display_name
+    if regular?
+      name
+    else
+      "#{winner_of.visitor.display_name}/#{winner_of.home.display_name}"
+    end
   end
 end
